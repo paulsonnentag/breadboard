@@ -7,34 +7,82 @@ interface Ref {
 
 function isRef() {}
 
-interface Fact {
+export interface Fact {
   e: string
   key: string
   value: any
 }
 
-const facts = []
+interface EntityMap {
+  [id: string]: EntityRef<Partial<EntityData>>
+}
 
-export interface Entity {
-  id: string
+interface EntityData {
   [key: string]: any
 }
 
-interface EntityMap {
-  [id: string]: Entity
+export class EntityRef<T extends Partial<EntityData>> {
+  constructor(
+    readonly id: string,
+    public data: T,
+    private readonly changeFacts: (fn: (facts: Fact[]) => void) => void
+  ) {}
+
+  replace<K extends keyof T>(key: K, value: T[K]): typeof this {
+    this.changeFacts((facts) => {
+      for (let index = 0; index < facts.length; index++) {
+        const fact = facts[index]
+
+        if (fact.e === this.id && fact.key === key) {
+          delete facts[index]
+        }
+      }
+
+      facts.push({ e: this.id, key: key.toString(), value })
+    })
+
+    return this
+  }
+
+  add<K extends keyof T>(key: K, value: T[K]): typeof this {
+    this.changeFacts((facts) => {
+      facts.push({ e: this.id, key: key.toString(), value })
+    })
+
+    return this
+  }
+
+  retract<K extends keyof T>(key: K, value?: T[K]): typeof this {
+    this.changeFacts((facts) => {
+      for (let index = 0; index < facts.length; index++) {
+        const fact = facts[index]
+        if (
+          (fact.e === this.id && fact.key === key && value === undefined) ||
+          fact.value == value
+        ) {
+          delete facts[index]
+        }
+      }
+    })
+
+    return this
+  }
 }
 
-export function getEntities(facts: Fact[]): EntityMap {
+export function getEntities(
+  facts: Fact[],
+  changeFacts: (fn: (facts: Fact[]) => void) => void
+): EntityMap {
   const entities: EntityMap = {}
 
   for (const { e, key, value } of facts) {
     let entity = entities[e]
 
     if (!entity) {
-      entity = entities[e] = { id: e }
+      entity = entities[e] = new EntityRef(e, {}, changeFacts)
     }
 
-    entity[key] = value
+    entity.data[key] = value
   }
 
   return entities
