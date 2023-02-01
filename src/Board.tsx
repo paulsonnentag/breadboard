@@ -36,7 +36,7 @@ export function Board() {
 
   return (
     <div
-      className="overflow-hidden relative bg-gray-100"
+      className="overflow-hidden relative"
       style={{
         width: "300vw",
         height: "300vh",
