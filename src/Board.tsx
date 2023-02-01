@@ -87,6 +87,14 @@ export function Board() {
         <WidgetBar />
       </div>
 
+      <div className="fixed top-0 right-3 bottom-0 overflow-auto pt-10">
+        {isDebugMode &&
+          facts.map((fact, index) => (
+            <div key={index}>
+              [{fact.e} {fact.key} {JSON.stringify(fact.value)}]
+            </div>
+          ))}
+      </div>
       <div className="fixed top-3 right-3">
         <label className="flex gap-1">
           <input
@@ -98,13 +106,6 @@ export function Board() {
           />
           debug mode
         </label>
-
-        {isDebugMode &&
-          facts.map((fact, index) => (
-            <div key={index}>
-              [{fact.e} {fact.key} {JSON.stringify(fact.value)}]
-            </div>
-          ))}
       </div>
     </div>
   )
@@ -155,6 +156,7 @@ function WidgetItem({ label, data }: WidgetItemProps) {
         offsetY: evt.clientY - bounds.top,
       } as CreateWidgetDragData)
     )
+    evt.dataTransfer.dropEffect = "copy"
   }
 
   return (
@@ -201,6 +203,8 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
         offsetY: evt.clientY - bounds.top,
       } as MoveWidgetDragData)
     )
+    evt.dataTransfer.dropEffect = "move"
+
     setTimeout(() => setIsDragged(true))
   }
 
