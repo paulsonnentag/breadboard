@@ -1,8 +1,8 @@
 import { DocumentId } from "automerge-repo"
 import { useDocument } from "automerge-repo-react-hooks"
-import { DbDoc, EntitiesContext, Fact, getEntities } from "./db"
+import { DbDoc, DbContext, Fact, getEntities } from "./db"
 import { Board } from "./Board"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 
 interface BreadboardProps {
   documentId: DocumentId
@@ -15,15 +15,27 @@ export default function Root({ documentId }: BreadboardProps) {
     changeDoc((doc) => fn(doc.facts))
   }, [])
 
+  const entities = getEntities(doc?.facts ?? [], changeFacts)
+
+  const context = useMemo(
+    () =>
+      doc
+        ? {
+            facts: doc.facts,
+            entities,
+            changeFacts,
+          }
+        : undefined,
+    [doc?.facts, entities, changeFacts]
+  )
+
   if (!doc) {
     return null
   }
 
-  const entities = getEntities(doc.facts, changeFacts)
-
   return (
-    <EntitiesContext.Provider value={entities}>
+    <DbContext.Provider value={context}>
       <Board />
-    </EntitiesContext.Provider>
+    </DbContext.Provider>
   )
 }

@@ -1,5 +1,6 @@
 import { Repo } from "automerge-repo"
-import { createContext, useContext } from "react"
+import { createContext, useCallback, useContext } from "react"
+import { v4 } from "uuid"
 
 interface Ref {
   __id: string
@@ -17,7 +18,7 @@ interface EntityMap {
   [id: string]: EntityRef<Partial<EntityData>>
 }
 
-interface EntityData {
+export interface EntityData {
   [key: string]: any
 }
 
@@ -102,8 +103,52 @@ export function createDatabaseDoc(repo: Repo, initialFacts: Fact[] = []) {
   return handle
 }
 
-export const EntitiesContext = createContext<EntityMap>({})
+interface DbContextProps {
+  facts: Fact[]
+  entities: EntityMap
+  changeFacts: (fn: (facts: Fact[]) => void) => void
+}
+
+export const DbContext = createContext<DbContextProps | undefined>(undefined)
 
 export function useEntities() {
-  return useContext(EntitiesContext)
+  const context = useContext(DbContext)
+  if (!context) {
+    throw new Error("missing DbContext")
+  }
+
+  return context.entities
+}
+
+export function useCreateEntity() {
+  const context = useContext(DbContext)
+
+  if (!context) {
+    throw new Error("missing DbContext")
+  }
+
+  return useCallback(
+    <T extends Partial<EntityData>>(data: T) => {
+      const id = v4()
+
+      context.changeFacts((facts) => {
+        for (const [key, value] of Object.entries(data)) {
+          facts.push({ e: id, key, value })
+        }
+      })
+
+      return new EntityRef(id, data, context.changeFacts)
+    },
+    [context.changeFacts]
+  )
+}
+
+export function useFacts() {
+  const context = useContext(DbContext)
+
+  if (!context) {
+    throw new Error("missing DbContext")
+  }
+
+  return context.facts
 }

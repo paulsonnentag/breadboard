@@ -1,9 +1,34 @@
-import { EntityRef, useEntities } from "./db"
-import React, { useMemo, useRef, useState } from "react"
+import { EntityData, EntityRef, useCreateEntity, useEntities, useFacts } from "./db"
+import React, { useRef, useState } from "react"
 import classNames from "classnames"
+import { DragHandleDots2Icon } from "@radix-ui/react-icons"
+import colors from "tailwindcss/colors"
+import { id } from "vite-plugin-wasm/dist/wasm-helper"
+import { Simulate } from "react-dom/test-utils"
+import drag = Simulate.drag
+
+interface CreateWidgetDragData {
+  type: "create"
+  offsetX: number
+  offsetY: number
+  entityData: EntityData
+}
+
+interface MoveWidgetDragData {
+  type: "move"
+  offsetX: number
+  offsetY: number
+  entityId: string
+}
+
+type DragData = CreateWidgetDragData | MoveWidgetDragData
 
 export function Board() {
   const entities = useEntities()
+  const createEntity = useCreateEntity()
+  const facts = useFacts()
+  const [isDebugMode, setIsDebugMode] = useState(false)
+
   const widgets = Object.values(entities).filter(
     (entity) =>
       entity.data.width !== undefined &&
@@ -21,17 +46,26 @@ export function Board() {
   }
 
   const onDrop = (evt: React.DragEvent) => {
-    const id = evt.dataTransfer.getData("application/entity-id")
-    const offsetX = parseInt(evt.dataTransfer.getData("application/offset-x"))
-    const offsetY = parseInt(evt.dataTransfer.getData("application/offset-y"))
-    const widget = entities[id] as EntityRef<WidgetEntityProps>
+    const dragData = JSON.parse(evt.dataTransfer.getData("application/drag-data")) as DragData
+
+    let widget: EntityRef<WidgetEntityProps> | undefined
+
+    switch (dragData.type) {
+      case "create":
+        widget = createEntity(dragData.entityData) as EntityRef<WidgetEntityProps>
+        break
+
+      case "move":
+        widget = entities[dragData.entityId] as EntityRef<WidgetEntityProps>
+        break
+    }
 
     if (!widget) {
       return
     }
 
-    widget.replace("x", evt.pageX - offsetX)
-    widget.replace("y", evt.pageY - offsetY)
+    widget.replace("x", evt.pageX - dragData.offsetX)
+    widget.replace("y", evt.pageY - dragData.offsetY)
   }
 
   return (
@@ -48,6 +82,90 @@ export function Board() {
       {widgets.map((widget) => (
         <WidgetContainer widget={widget} key={widget.id} />
       ))}
+
+      <div className="fixed top-3 left-3">
+        <WidgetBar />
+      </div>
+
+      <div className="fixed top-3 right-3">
+        <label className="flex gap-1">
+          <input
+            type="checkbox"
+            checked={isDebugMode}
+            onChange={() => {
+              setIsDebugMode((isDebugMode) => !isDebugMode)
+            }}
+          />
+          debug mode
+        </label>
+
+        {isDebugMode &&
+          facts.map((fact, index) => (
+            <div key={index}>
+              [{fact.e} {fact.key} {JSON.stringify(fact.value)}]
+            </div>
+          ))}
+      </div>
+    </div>
+  )
+}
+
+const MAP = {
+  type: "map",
+  width: 300,
+  height: 300,
+}
+
+const CAMPGROUND = {
+  type: "campground",
+  width: 200,
+  height: 300,
+}
+
+function WidgetBar() {
+  return (
+    <div className="flex gap-1">
+      <WidgetItem label="Map" data={MAP} />
+      <WidgetItem label="Camp ground finder" data={CAMPGROUND} />
+    </div>
+  )
+}
+
+interface WidgetItemProps {
+  label: string
+  data: EntityData
+}
+
+function WidgetItem({ label, data }: WidgetItemProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  const onDragStart = (evt: React.DragEvent) => {
+    if (!ref.current) {
+      return
+    }
+
+    var bounds = ref.current.getBoundingClientRect()
+
+    evt.dataTransfer.setData(
+      "application/drag-data",
+      JSON.stringify({
+        type: "create",
+        entityData: data,
+        offsetX: evt.clientX - bounds.left,
+        offsetY: evt.clientY - bounds.top,
+      } as CreateWidgetDragData)
+    )
+  }
+
+  return (
+    <div
+      ref={ref}
+      onDragStart={onDragStart}
+      className="bg-gray-400 text-white p-2 rounded flex items-center gap-1"
+      draggable={true}
+    >
+      <DragHandleDots2Icon color={colors.gray[300]} />
+      {label}
     </div>
   )
 }
@@ -73,12 +191,16 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
     }
 
     var bounds = ref.current.getBoundingClientRect()
-    var x = evt.clientX - bounds.left
-    var y = evt.clientY - bounds.top
 
-    evt.dataTransfer.setData("application/entity-id", widget.id)
-    evt.dataTransfer.setData("application/offset-x", x.toString())
-    evt.dataTransfer.setData("application/offset-y", y.toString())
+    evt.dataTransfer.setData(
+      "application/drag-data",
+      JSON.stringify({
+        type: "move",
+        entityId: widget.id,
+        offsetX: evt.clientX - bounds.left,
+        offsetY: evt.clientY - bounds.top,
+      } as MoveWidgetDragData)
+    )
     setTimeout(() => setIsDragged(true))
   }
 
@@ -92,7 +214,7 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
       draggable={true}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={classNames("absolute border-b-gray-300 rounded bg-white shadow", {
+      className={classNames("absolute border-b-gray-300 rounded bg-white shadow overflow-auto", {
         "opacity-0": isDragged,
       })}
       style={{
@@ -101,6 +223,8 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
         width: widget.data.width,
         height: widget.data.height,
       }}
-    ></div>
+    >
+      <pre className="p-1">{JSON.stringify(widget.data, null, 2)}</pre>
+    </div>
   )
 }
