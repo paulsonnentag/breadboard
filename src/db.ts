@@ -7,7 +7,7 @@ interface Ref {
   __refId: string
 }
 
-function getRef(id: string) {
+function createRef(id: string) {
   return { __refId: id }
 }
 
@@ -46,7 +46,7 @@ export class EntityRef<T extends Partial<EntityData>> {
         }
       }
 
-      facts.push({ e: this.id, key: key.toString(), value })
+      facts.push({ e: this.id, key: key.toString(), value: replaceObjectValuesWithRefs(value) })
     })
 
     return this
@@ -54,20 +54,17 @@ export class EntityRef<T extends Partial<EntityData>> {
 
   add<K extends keyof T>(key: K, value: T[K]): typeof this {
     this.changeFacts((facts) => {
-      facts.push({ e: this.id, key: key.toString(), value })
+      facts.push({ e: this.id, key: key.toString(), value: replaceObjectValuesWithRefs(value) })
     })
 
     return this
   }
 
-  retract<K extends keyof T>(key: K, value?: T[K]): typeof this {
+  retract<K extends keyof T>(key: K): typeof this {
     this.changeFacts((facts) => {
       for (let index = 0; index < facts.length; index++) {
         const fact = facts[index]
-        if (
-          (fact.e === this.id && fact.key === key && value === undefined) ||
-          fact.value == value
-        ) {
+        if (fact.e === this.id && fact.key === key) {
           delete facts[index]
         }
       }
@@ -86,6 +83,19 @@ export class EntityRef<T extends Partial<EntityData>> {
       }
     })
   }
+}
+
+// we need to turn any object value into a ref that can be stored in automerge
+function replaceObjectValuesWithRefs(value: any): any {
+  if (value instanceof EntityRef) {
+    return createRef(value.id)
+  }
+
+  if (value instanceof Array) {
+    return value.map((x) => replaceObjectValuesWithRefs(x))
+  }
+
+  return value
 }
 
 export type UnknownEntityRef = EntityRef<Partial<EntityData>>

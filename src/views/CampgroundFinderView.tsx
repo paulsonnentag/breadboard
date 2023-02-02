@@ -5,10 +5,10 @@ import { isMap } from "./MapView"
 import { useMemo, useState } from "react"
 import PlaceResult = google.maps.places.PlaceResult
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
-import LatLngBounds = google.maps.LatLngBounds
 
 export interface CampgroundFinderEntityProps {
   type: "campgroundFinder"
+  results?: PlaceResult[]
 }
 
 function isCampgroundFinder(data: EntityData): data is CampgroundFinderEntityProps {
@@ -18,7 +18,6 @@ function isCampgroundFinder(data: EntityData): data is CampgroundFinderEntityPro
 function CampgroundFinderView({
   entity,
 }: EntityViewProps<CampgroundFinderEntityProps & NearbyWidgetProp>) {
-  const [results, setResults] = useState<PlaceResult[] | null>([])
   const availableBounds = entity.data.nearbyWidgets.filter(
     (widget) => isMap(widget.data) && widget.data.bounds
   )
@@ -35,7 +34,11 @@ function CampgroundFinderView({
         type: "campground",
       },
       (results) => {
-        setResults(results)
+        if (results) {
+          entity.replace("results", JSON.parse(JSON.stringify(results)))
+        } else {
+          entity.retract("results")
+        }
       }
     )
   }
@@ -56,22 +59,9 @@ function CampgroundFinderView({
 
       {availableBounds.length === 0 && "place me near a map"}
 
-      {results &&
-        results.map((result, index) => (
+      {entity.data.results &&
+        entity.data.results.map((result, index) => (
           <div className="flex flex gap-2" key={index}>
-            <div
-              className="rounded w-[50px] h-[50px] bg-gray-100 bg-cover flex-shrink-0"
-              style={
-                result.photos
-                  ? {
-                      backgroundImage: `url(${result.photos[0].getUrl({
-                        maxWidth: 30,
-                        maxHeight: 30,
-                      })}`,
-                    }
-                  : {}
-              }
-            ></div>
             <div>
               <div key={index}>
                 {result.url ? <a href={result.url}>{result.name}</a> : result.name}
