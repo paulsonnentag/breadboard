@@ -1,11 +1,15 @@
-import { Computation, ComputedValue, getWidgets, isWidget } from "./index"
-import { WidgetEntityProps } from "../Board"
-import { EntityRef } from "../db"
+import { Computation, ComputedValue } from "./index"
+import { getWidgets, isWidget, WidgetEntityProps } from "../Board"
+import { EntityRef, UnknownEntityRef } from "../db"
 
 const MIN_DISTANCE = 100
 
-const closeWidgetsComputation: Computation<EntityRef<WidgetEntityProps>[]> = {
-  name: "closeWidgets",
+export interface NearbyWidgetProp {
+  nearbyWidgets: UnknownEntityRef[]
+}
+
+const closeWidgetsComputation: Computation<UnknownEntityRef[]> = {
+  name: "nearbyWidgets",
   fn: (entity, entities) => {
     if (!isWidget(entity)) {
       return

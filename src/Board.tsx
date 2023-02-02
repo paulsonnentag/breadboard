@@ -1,9 +1,16 @@
-import { EntityData, EntityRef, useCreateEntity, useEntities, useFacts } from "./db"
+import {
+  EntityData,
+  EntityMap,
+  EntityRef,
+  UnknownEntityRef,
+  useCreateEntity,
+  useEntities,
+  useFacts,
+} from "./db"
 import React, { useRef, useState } from "react"
 import classNames from "classnames"
 import { WidgetView } from "./views"
 import WidgetBar from "./WidgetBar"
-import { getWidgets } from "./computations"
 
 export interface CreateWidgetDragData {
   type: "create"
@@ -117,6 +124,21 @@ export interface WidgetEntityProps {
   height: number
 }
 
+export function isWidget(entity: UnknownEntityRef): entity is EntityRef<WidgetEntityProps> {
+  return (
+    entity.data.width !== undefined &&
+    entity.data.height !== undefined &&
+    entity.data.x !== undefined &&
+    entity.data.y !== undefined
+  )
+}
+
+export function getWidgets(
+  entities: UnknownEntityRef[] | EntityMap
+): EntityRef<WidgetEntityProps>[] {
+  return Object.values(entities).filter(isWidget)
+}
+
 interface WidgetContainerProps {
   widget: EntityRef<WidgetEntityProps>
 }
@@ -126,8 +148,6 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   const onDragStart = (evt: React.DragEvent) => {
-    console.log("drag start")
-
     if (!ref.current) {
       return
     }

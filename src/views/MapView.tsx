@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react"
 import Map = google.maps.Map
 import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
+import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
 
 export interface MapEntityProps {
   center: LatLngLiteral
   zoom?: number
+  bounds?: LatLngBoundsLiteral
 }
 
 function MapView({ entity }: EntityViewProps<MapEntityProps>) {
@@ -36,6 +38,13 @@ function MapView({ entity }: EntityViewProps<MapEntityProps>) {
       gestureHandling: "greedy",
     }))
 
+    const boundsChangedListener = currentMap.addListener("bounds_changed", () => {
+      const bounds = currentMap.getBounds()
+      if (bounds) {
+        entity.replace("bounds", bounds.toJSON())
+      }
+    })
+
     const centerChangedListener = currentMap.addListener("center_changed", () => {
       const center = currentMap.getCenter()
       if (center) {
@@ -53,12 +62,13 @@ function MapView({ entity }: EntityViewProps<MapEntityProps>) {
     return () => {
       centerChangedListener.remove()
       zoomChangedListener.remove()
+      boundsChangedListener.remove()
     }
   }, [containerRef.current])
 
   return (
     <div
-      className="flex-1"
+      className="w-full h-full"
       ref={containerRef}
       draggable
       onDragStart={(evt) => {
@@ -69,9 +79,13 @@ function MapView({ entity }: EntityViewProps<MapEntityProps>) {
   )
 }
 
+export function isMap(data: EntityData): data is MapEntityProps {
+  return data.center !== undefined
+}
+
 const viewDefinition: ViewType = {
   name: "Map",
-  condition: (data: EntityData) => data.center,
+  condition: isMap,
   view: MapView,
 }
 

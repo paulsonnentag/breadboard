@@ -3,6 +3,7 @@ import { EntityData, EntityRef } from "../db"
 import rawViewDef from "./RawView"
 import mapViewDef from "./MapView"
 import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
+import campgroundFinderView from "./CampgroundFinderView"
 
 export interface EntityViewProps<T extends Partial<EntityData>> {
   entity: EntityRef<T>
@@ -14,7 +15,7 @@ export interface ViewType {
   view: FunctionComponent<EntityViewProps<Partial<EntityData>>>
 }
 
-const VIEW_TYPES: ViewType[] = [mapViewDef, rawViewDef]
+const VIEW_TYPES: ViewType[] = [mapViewDef, campgroundFinderView, rawViewDef]
 
 function getSupportedViews(data: EntityData): ViewType[] {
   return VIEW_TYPES.filter((viewType) => viewType.condition(data))
@@ -39,7 +40,7 @@ export function WidgetView({ entity }: EntityViewProps<Partial<EntityData>>) {
         </button>
       </div>
 
-      {createElement(view.view, { entity })}
+      <div className="flex-1 overflow-auto">{createElement(view.view, { entity })}</div>
     </div>
   )
 }

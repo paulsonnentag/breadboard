@@ -4,14 +4,16 @@ import ReactJson from "react-json-view"
 
 function RawView({ entity }: EntityViewProps<Partial<EntityData>>) {
   return (
-    <ReactJson
-      displayDataTypes={false}
-      src={entity.data}
-      collapsed={1}
-      enableClipboard={false}
-      name={null}
-      theme="grayscale:inverted"
-    />
+    <div className="p-2">
+      <ReactJson
+        displayDataTypes={false}
+        src={entity.data}
+        collapsed={1}
+        enableClipboard={false}
+        name={null}
+        theme="grayscale:inverted"
+      />
+    </div>
   )
 }
 
