@@ -8,6 +8,16 @@
   </head>
   <body class="bg-dotted">
     <div id="root"></div>
+
+    <!-- this is very uggly but unfortunately there is no official npm package for google maps -->
+    <script src="/src/api-keys.js"></script>
+    <script>
+      function initMap () {
+      }
+    </script>
+    <script>
+      document.write(`<script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap&libraries=places">${"<"}/script>`)
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

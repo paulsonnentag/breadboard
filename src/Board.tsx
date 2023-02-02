@@ -3,9 +3,7 @@ import React, { useRef, useState } from "react"
 import classNames from "classnames"
 import { DragHandleDots2Icon } from "@radix-ui/react-icons"
 import colors from "tailwindcss/colors"
-import { id } from "vite-plugin-wasm/dist/wasm-helper"
-import { Simulate } from "react-dom/test-utils"
-import drag = Simulate.drag
+import { WidgetView } from "./views"
 
 interface CreateWidgetDragData {
   type: "create"
@@ -112,9 +110,14 @@ export function Board() {
 }
 
 const MAP = {
-  type: "map",
   width: 300,
   height: 300,
+  bounds: {
+    north: 42.023,
+    south: 41.6446,
+    east: -87.524,
+    west: -87.9401,
+  },
 }
 
 const CAMPGROUND = {
@@ -188,6 +191,8 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   const onDragStart = (evt: React.DragEvent) => {
+    console.log("drag start")
+
     if (!ref.current) {
       return
     }
@@ -218,7 +223,7 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
       draggable={true}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={classNames("absolute border-b-gray-300 rounded bg-white shadow overflow-auto", {
+      className={classNames("absolute", {
         "opacity-0": isDragged,
       })}
       style={{
@@ -228,7 +233,7 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
         height: widget.data.height,
       }}
     >
-      <pre className="p-1">{JSON.stringify(widget.data, null, 2)}</pre>
+      <WidgetView entity={widget} />
     </div>
   )
 }

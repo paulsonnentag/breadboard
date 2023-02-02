@@ -1,12 +1,19 @@
 import { Repo } from "automerge-repo"
 import { createContext, useCallback, useContext } from "react"
 import { v4 } from "uuid"
+import { applyComputation } from "./computations"
 
 interface Ref {
-  __id: string
+  __refId: string
 }
 
-function isRef() {}
+function getRef(id: string) {
+  return { __refId: id }
+}
+
+function isRef(value: any): boolean {
+  return value && value.__refId
+}
 
 export interface Fact {
   e: string
@@ -14,7 +21,7 @@ export interface Fact {
   value: any
 }
 
-interface EntityMap {
+export interface EntityMap {
   [id: string]: EntityRef<Partial<EntityData>>
 }
 
@@ -68,6 +75,17 @@ export class EntityRef<T extends Partial<EntityData>> {
 
     return this
   }
+
+  destroy() {
+    this.changeFacts((facts) => {
+      for (let index = 0; index < facts.length; index++) {
+        const fact = facts[index]
+        if (fact.e === this.id) {
+          delete facts[index]
+        }
+      }
+    })
+  }
 }
 
 export function getEntities(
@@ -76,14 +94,24 @@ export function getEntities(
 ): EntityMap {
   const entities: EntityMap = {}
 
-  for (const { e, key, value } of facts) {
-    let entity = entities[e]
+  function getEntityRefById(id: string) {
+    let entity = entities[id]
 
     if (!entity) {
-      entity = entities[e] = new EntityRef(e, {}, changeFacts)
+      entity = entities[id] = new EntityRef(id, {}, changeFacts)
     }
 
-    entity.data[key] = value
+    return entity
+  }
+
+  for (const { e, key, value } of facts) {
+    let entity = getEntityRefById(e)
+
+    entity.data[key] = isRef(value) ? getEntityRefById(value.__refId) : value
+  }
+
+  for (const entity of Object.values(entities)) {
+    applyComputation(entity.data, entities)
   }
 
   return entities
