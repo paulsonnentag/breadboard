@@ -1,8 +1,18 @@
 import { EntityData } from "../db"
 import { EntityViewProps, ViewType } from "./index"
+import ReactJson from "react-json-view"
 
 function RawView({ entity }: EntityViewProps<Partial<EntityData>>) {
-  return <pre className="p-1">{JSON.stringify(entity.data, null, 2)}</pre>
+  return (
+    <ReactJson
+      displayDataTypes={false}
+      src={entity.data}
+      collapsed={1}
+      enableClipboard={false}
+      name={null}
+      theme="grayscale:inverted"
+    />
+  )
 }
 
 const viewDefition: ViewType = {

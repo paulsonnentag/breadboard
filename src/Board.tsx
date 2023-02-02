@@ -1,10 +1,9 @@
 import { EntityData, EntityRef, useCreateEntity, useEntities, useFacts } from "./db"
 import React, { useRef, useState } from "react"
 import classNames from "classnames"
-import { DragHandleDots2Icon } from "@radix-ui/react-icons"
-import colors from "tailwindcss/colors"
 import { WidgetView } from "./views"
 import WidgetBar from "./WidgetBar"
+import { getWidgets } from "./computations"
 
 export interface CreateWidgetDragData {
   type: "create"
@@ -28,13 +27,7 @@ export function Board() {
   const facts = useFacts()
   const [isDebugMode, setIsDebugMode] = useState(false)
 
-  const widgets = Object.values(entities).filter(
-    (entity) =>
-      entity.data.width !== undefined &&
-      entity.data.height !== undefined &&
-      entity.data.x !== undefined &&
-      entity.data.y !== undefined
-  ) as EntityRef<WidgetEntityProps>[]
+  const widgets = getWidgets(entities)
 
   const onDragEnter = (evt: React.DragEvent) => {
     evt.preventDefault()

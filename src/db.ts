@@ -22,7 +22,7 @@ export interface Fact {
 }
 
 export interface EntityMap {
-  [id: string]: EntityRef<Partial<EntityData>>
+  [id: string]: UnknownEntityRef
 }
 
 export interface EntityData {
@@ -88,6 +88,8 @@ export class EntityRef<T extends Partial<EntityData>> {
   }
 }
 
+export type UnknownEntityRef = EntityRef<Partial<EntityData>>
+
 export function getEntities(
   facts: Fact[],
   changeFacts: (fn: (facts: Fact[]) => void) => void
@@ -111,7 +113,7 @@ export function getEntities(
   }
 
   for (const entity of Object.values(entities)) {
-    applyComputation(entity.data, entities)
+    applyComputation(entity, entities)
   }
 
   return entities
