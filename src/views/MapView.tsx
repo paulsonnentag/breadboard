@@ -2,14 +2,15 @@ import { EntityData } from "../db"
 import { EntityViewProps, ViewType } from "./index"
 import { useEffect, useRef } from "react"
 import Map = google.maps.Map
-import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
-import LatLngBounds = google.maps.LatLngBounds
+import LatLngLiteral = google.maps.LatLngLiteral
+import LatLng = google.maps.LatLng
 
-interface MapViewEntity {
-  bounds: LatLngBoundsLiteral
+export interface MapEntityProps {
+  center: LatLngLiteral
+  zoom?: number
 }
 
-function MapView({ entity }: EntityViewProps<MapViewEntity>) {
+function MapView({ entity }: EntityViewProps<MapEntityProps>) {
   const mapRef = useRef<Map>()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -19,44 +20,45 @@ function MapView({ entity }: EntityViewProps<MapViewEntity>) {
       return
     }
 
-    const bounds = new LatLngBounds(entity.data.bounds)
-
     const currentMap = (mapRef.current = new google.maps.Map(currentContainer, {
-      center: bounds.getCenter(),
-      zoom: 11,
+      center: new LatLng(entity.data.center),
+      zoom: entity.data.zoom ?? 11,
+
+      // disable additional ui controls
       streetView: null,
       fullscreenControl: false,
       streetViewControl: false,
       scaleControl: false,
       zoomControl: false,
       mapTypeControl: false,
+
+      // allow to zoom map on scroll without pressing command
+      gestureHandling: "greedy",
     }))
 
-    currentMap.fitBounds(bounds)
-
-    /*const onChangeBounds = () => {
-      const newBounds = currentMap.getBounds()
-
-      if (newBounds) {
-        entity.replace("bounds", newBounds.toJSON())
+    const centerChangedListener = currentMap.addListener("center_changed", () => {
+      const center = currentMap.getCenter()
+      if (center) {
+        entity.replace("center", center.toJSON())
       }
-    }
+    })
 
-    const centerChangedListener = currentMap.addListener("center_changed", onChangeBounds)
-    const zoomChangedListener = currentMap.addListener("zoom_changed", onChangeBounds)
+    const zoomChangedListener = currentMap.addListener("zoom_changed", () => {
+      const zoom = currentMap.getZoom()
+      if (zoom !== undefined) {
+        entity.replace("zoom", zoom)
+      }
+    })
 
     return () => {
       centerChangedListener.remove()
       zoomChangedListener.remove()
     }
-
-
-     */
   }, [containerRef.current])
 
   return (
     <div
-      className="w-full h-full"
+      className="flex-1"
       ref={containerRef}
       draggable
       onDragStart={(evt) => {
@@ -69,7 +71,7 @@ function MapView({ entity }: EntityViewProps<MapViewEntity>) {
 
 const viewDefinition: ViewType = {
   name: "Map",
-  condition: (data: EntityData) => data.bounds,
+  condition: (data: EntityData) => data.center,
   view: MapView,
 }
 

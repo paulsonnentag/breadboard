@@ -26,7 +26,7 @@ export function WidgetView({ entity }: EntityViewProps<Partial<EntityData>>) {
   const view = supportedViews[0]
 
   return (
-    <div className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full">
+    <div className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
       <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
         <DragHandleDots2Icon />
 

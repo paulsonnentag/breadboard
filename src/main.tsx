@@ -21,12 +21,7 @@ const params = new URLSearchParams(window.location.search)
 let documentId = params.get("documentId") as DocumentId
 
 if (!documentId) {
-  const handle = createDatabaseDoc(repo, [
-    { e: "w1", key: "width", value: 200 },
-    { e: "w1", key: "height", value: 200 },
-    { e: "w1", key: "x", value: 100 },
-    { e: "w1", key: "y", value: 100 },
-  ])
+  const handle = createDatabaseDoc(repo)
   documentId = handle.documentId
   window.history.replaceState(null, "", `?documentId=${documentId}`)
 }

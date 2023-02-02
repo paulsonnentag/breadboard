@@ -4,22 +4,23 @@ import classNames from "classnames"
 import { DragHandleDots2Icon } from "@radix-ui/react-icons"
 import colors from "tailwindcss/colors"
 import { WidgetView } from "./views"
+import WidgetBar from "./WidgetBar"
 
-interface CreateWidgetDragData {
+export interface CreateWidgetDragData {
   type: "create"
   offsetX: number
   offsetY: number
   entityData: EntityData
 }
 
-interface MoveWidgetDragData {
+export interface MoveWidgetDragData {
   type: "move"
   offsetX: number
   offsetY: number
   entityId: string
 }
 
-type DragData = CreateWidgetDragData | MoveWidgetDragData
+export type DragData = CreateWidgetDragData | MoveWidgetDragData
 
 export function Board() {
   const entities = useEntities()
@@ -87,11 +88,18 @@ export function Board() {
 
       <div className="fixed top-0 right-3 bottom-0 overflow-auto pt-10">
         {isDebugMode &&
-          facts.map((fact, index) => (
-            <div key={index}>
-              [{fact.e} {fact.key} {JSON.stringify(fact.value)}]
-            </div>
-          ))}
+          facts.map((fact, index) => {
+            const value = JSON.stringify(fact.value)
+            return (
+              <div key={index}>
+                [{""} {fact.e.slice(0, 7)} {fact.key}{" "}
+                <span className="text-blue-500">
+                  {value.length > 50 ? `${value.slice(0, 50)} ...` : value}
+                </span>{" "}
+                ]
+              </div>
+            )
+          })}
       </div>
       <div className="fixed top-3 right-3">
         <label className="flex gap-1">
@@ -109,73 +117,7 @@ export function Board() {
   )
 }
 
-const MAP = {
-  width: 300,
-  height: 300,
-  bounds: {
-    north: 42.023,
-    south: 41.6446,
-    east: -87.524,
-    west: -87.9401,
-  },
-}
-
-const CAMPGROUND = {
-  type: "campground",
-  width: 200,
-  height: 300,
-}
-
-function WidgetBar() {
-  return (
-    <div className="flex gap-1">
-      <WidgetItem label="Map" data={MAP} />
-      <WidgetItem label="Camp ground finder" data={CAMPGROUND} />
-    </div>
-  )
-}
-
-interface WidgetItemProps {
-  label: string
-  data: EntityData
-}
-
-function WidgetItem({ label, data }: WidgetItemProps) {
-  const ref = useRef<HTMLDivElement>(null)
-
-  const onDragStart = (evt: React.DragEvent) => {
-    if (!ref.current) {
-      return
-    }
-
-    var bounds = ref.current.getBoundingClientRect()
-
-    evt.dataTransfer.setData(
-      "application/drag-data",
-      JSON.stringify({
-        type: "create",
-        entityData: data,
-        offsetX: evt.clientX - bounds.left,
-        offsetY: evt.clientY - bounds.top,
-      } as CreateWidgetDragData)
-    )
-    evt.dataTransfer.dropEffect = "copy"
-  }
-
-  return (
-    <div
-      ref={ref}
-      onDragStart={onDragStart}
-      className="bg-gray-400 text-white p-2 rounded flex items-center gap-1"
-      draggable={true}
-    >
-      <DragHandleDots2Icon color={colors.gray[300]} />
-      {label}
-    </div>
-  )
-}
-
-interface WidgetEntityProps {
+export interface WidgetEntityProps {
   x: number
   y: number
   width: number
