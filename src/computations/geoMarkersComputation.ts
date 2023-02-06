@@ -9,17 +9,33 @@ const geoMarkersComputation: Computation<ComputedValue<LatLngLiteral>[]> = {
   },
 }
 
-function getGeoMarkers(entity: EntityData): ComputedValue<LatLngLiteral>[] {
+function getGeoMarkers(
+  value: any,
+  visitedEntityIds: { [id: string]: boolean } = {}
+): ComputedValue<LatLngLiteral>[] {
   let geoMarkers: ComputedValue<LatLngLiteral>[] = []
 
-  if (entity.latLng) {
-    geoMarkers.push({ value: entity.latLng, entity })
+  if (!(value instanceof EntityRef) || visitedEntityIds[value.id]) {
+    return []
   }
 
-  /*
-  if (entity.results) {
-    geoMarkers.push({ value: })
-  }*/
+  visitedEntityIds[value.id] = true
+
+  if (value.data.latLng) {
+    geoMarkers.push({ value: value.data.latLng, entity: value })
+  }
+
+  if (value.data.items) {
+    geoMarkers = geoMarkers.concat(
+      value.data.items.flatMap((value: any) => getGeoMarkers(value, visitedEntityIds))
+    )
+  }
+
+  if (value.data.nearbyWidgets) {
+    geoMarkers = geoMarkers.concat(
+      value.data.nearbyWidgets.flatMap((value: any) => getGeoMarkers(value, visitedEntityIds))
+    )
+  }
 
   return geoMarkers
 }
