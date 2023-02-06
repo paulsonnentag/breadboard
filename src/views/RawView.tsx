@@ -1,6 +1,7 @@
 import { EntityData } from "../db"
 import { EntityViewProps, ViewType } from "./index"
 import ReactJson from "react-json-view"
+import { registerViewType } from "./view-type-registry"
 
 function RawView({ entity }: EntityViewProps<Partial<EntityData>>) {
   return (
@@ -17,10 +18,8 @@ function RawView({ entity }: EntityViewProps<Partial<EntityData>>) {
   )
 }
 
-const viewDefition: ViewType = {
+registerViewType({
   name: "Raw",
   condition: (data: EntityData) => true,
   view: RawView,
-}
-
-export default viewDefition
+})

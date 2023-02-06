@@ -11,6 +11,7 @@ import React, { useRef, useState } from "react"
 import classNames from "classnames"
 import { WidgetView } from "./views"
 import WidgetBar from "./WidgetBar"
+import DebugView from "./DebugView"
 
 export interface CreateWidgetDragData {
   type: "create"
@@ -31,9 +32,6 @@ export type DragData = CreateWidgetDragData | MoveWidgetDragData
 export function Board() {
   const entities = useEntities()
   const createEntity = useCreateEntity()
-  const facts = useFacts()
-  const [isDebugMode, setIsDebugMode] = useState(false)
-
   const widgets = getWidgets(entities)
 
   const onDragEnter = (evt: React.DragEvent) => {
@@ -86,32 +84,8 @@ export function Board() {
         <WidgetBar />
       </div>
 
-      <div className="fixed top-0 right-3 bottom-0 overflow-auto pt-10">
-        {isDebugMode &&
-          facts.map((fact, index) => {
-            const value = JSON.stringify(fact.value)
-            return (
-              <div key={index}>
-                [{""} {fact.e.slice(0, 7)} {fact.key}{" "}
-                <span className="text-blue-500">
-                  {value.length > 50 ? `${value.slice(0, 50)} ...` : value}
-                </span>{" "}
-                ]
-              </div>
-            )
-          })}
-      </div>
       <div className="fixed top-3 right-3">
-        <label className="flex gap-1">
-          <input
-            type="checkbox"
-            checked={isDebugMode}
-            onChange={() => {
-              setIsDebugMode((isDebugMode) => !isDebugMode)
-            }}
-          />
-          debug mode
-        </label>
+        <DebugView />
       </div>
     </div>
   )

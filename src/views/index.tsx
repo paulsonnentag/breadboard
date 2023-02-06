@@ -1,37 +1,36 @@
 import { createElement, FunctionComponent } from "react"
 import { EntityData, EntityRef } from "../db"
-import rawViewDef from "./RawView"
-import mapViewDef from "./MapView"
+
+import "./MapView"
+import "./CampgroundFinderView"
+import "./NamedEntityView"
+import "./ListView"
+import "./RawView"
+
 import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
-import campgroundFinderView from "./CampgroundFinderView"
+import { EntityViewProps, getSupportedViews } from "./view-type-registry"
 
-export interface EntityViewProps<T extends Partial<EntityData>> {
-  entity: EntityRef<T>
+interface WidgetViewProps extends EntityViewProps<Partial<EntityData>> {
+  view?: string
 }
 
-export interface ViewType {
-  name: string
-  condition: (data: EntityData) => boolean
-  view: FunctionComponent<EntityViewProps<Partial<EntityData>>>
-}
-
-const VIEW_TYPES: ViewType[] = [mapViewDef, campgroundFinderView, rawViewDef]
-
-function getSupportedViews(data: EntityData): ViewType[] {
-  return VIEW_TYPES.filter((viewType) => viewType.condition(data))
-}
-
-export function WidgetView({ entity }: EntityViewProps<Partial<EntityData>>) {
+export function WidgetView({ entity, view }: WidgetViewProps) {
   const supportedViews = getSupportedViews(entity.data)
 
-  const view = supportedViews[0]
+  const selectedView = view
+    ? supportedViews.find((supportedView) => supportedView.name === view)
+    : supportedViews[0]
+
+  if (!selectedView) {
+    return <div>"no supported view"</div>
+  }
 
   return (
     <div className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
       <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
         <DragHandleDots2Icon />
 
-        {view.name}
+        {selectedView.name}
 
         <div className="flex-1"></div>
 
@@ -40,7 +39,7 @@ export function WidgetView({ entity }: EntityViewProps<Partial<EntityData>>) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-auto">{createElement(view.view, { entity })}</div>
+      <div className="flex-1 overflow-auto">{createElement(selectedView.view, { entity })}</div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import Map = google.maps.Map
 import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
+import { registerViewType } from "./view-type-registry"
 
 export interface MapEntityProps {
   center: LatLngLiteral
@@ -83,10 +84,8 @@ export function isMap(data: EntityData): data is MapEntityProps {
   return data.center !== undefined
 }
 
-const viewDefinition: ViewType = {
+registerViewType({
   name: "Map",
   condition: isMap,
   view: MapView,
-}
-
-export default viewDefinition
+})

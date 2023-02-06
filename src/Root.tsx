@@ -1,6 +1,7 @@
 import { DocumentId } from "automerge-repo"
 import { useDocument } from "automerge-repo-react-hooks"
-import { DbDoc, DbContext, Fact, getEntities } from "./db"
+import { DbDoc, Fact, getEntities } from "./db"
+import { DbContext } from "./db-context"
 import { Board } from "./Board"
 import { useCallback, useMemo } from "react"
 

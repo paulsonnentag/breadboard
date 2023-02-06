@@ -16,11 +16,10 @@ function getGeoMarkers(entity: EntityData): ComputedValue<LatLngLiteral>[] {
     geoMarkers.push({ value: entity.latLng, entity })
   }
 
-  for (const [key, value] of Object.entries(entity)) {
-    if (value instanceof EntityRef) {
-      geoMarkers = geoMarkers.concat(getGeoMarkers(value))
-    }
-  }
+  /*
+  if (entity.results) {
+    geoMarkers.push({ value: })
+  }*/
 
   return geoMarkers
 }

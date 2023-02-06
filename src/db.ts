@@ -2,6 +2,7 @@ import { Repo } from "automerge-repo"
 import { createContext, useCallback, useContext } from "react"
 import { v4 } from "uuid"
 import { applyComputation } from "./computations"
+import { DbContext } from "./db-context"
 
 interface Ref {
   __refId: string
@@ -46,7 +47,15 @@ export class EntityRef<T extends Partial<EntityData>> {
         }
       }
 
-      facts.push({ e: this.id, key: key.toString(), value: replaceObjectValuesWithRefs(value) })
+      try {
+        facts.push({ e: this.id, key: key.toString(), value: replaceObjectValuesWithRefs(value) })
+      } catch (err) {
+        console.error("invalid fact", {
+          e: this.id,
+          key: key.toString(),
+          value: replaceObjectValuesWithRefs(value),
+        })
+      }
     })
 
     return this
@@ -92,7 +101,7 @@ function replaceObjectValuesWithRefs(value: any): any {
   }
 
   if (value instanceof Array) {
-    return value.map((x) => replaceObjectValuesWithRefs(x))
+    return value.map(replaceObjectValuesWithRefs)
   }
 
   return value
@@ -116,10 +125,22 @@ export function getEntities(
     return entity
   }
 
+  function resolveRefsInValue(value: any): any {
+    if (isRef(value)) {
+      return getEntityRefById(value.__refId)
+    }
+
+    if (value instanceof Array) {
+      return value.map(resolveRefsInValue)
+    }
+
+    return value
+  }
+
   for (const { e, key, value } of facts) {
     let entity = getEntityRefById(e)
 
-    entity.data[key] = isRef(value) ? getEntityRefById(value.__refId) : value
+    entity.data[key] = resolveRefsInValue(value)
   }
 
   for (const entity of Object.values(entities)) {
@@ -142,14 +163,6 @@ export function createDatabaseDoc(repo: Repo, initialFacts: Fact[] = []) {
 
   return handle
 }
-
-interface DbContextProps {
-  facts: Fact[]
-  entities: EntityMap
-  changeFacts: (fn: (facts: Fact[]) => void) => void
-}
-
-export const DbContext = createContext<DbContextProps | undefined>(undefined)
 
 export function useEntities() {
   const context = useContext(DbContext)

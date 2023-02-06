@@ -5,6 +5,7 @@ import colors from "tailwindcss/colors"
 import { MapEntityProps } from "./views/MapView"
 import { CreateWidgetDragData, WidgetEntityProps } from "./Board"
 import { CampgroundFinderEntityProps } from "./views/CampgroundFinderView"
+import { ListEntityProps } from "./views/ListView"
 
 const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
   width: 300,
@@ -26,12 +27,19 @@ const EMPTY: Partial<WidgetEntityProps> = {
   height: 300,
 }
 
+const EMPTY_LIST: Partial<WidgetEntityProps> & ListEntityProps = {
+  items: [],
+  width: 300,
+  height: 300,
+}
+
 export default function WidgetBar() {
   return (
     <div className="flex gap-1">
       <WidgetItem label="Map" data={MAP} />
       <WidgetItem label="Campground finder" data={CAMPGROUND} />
       <WidgetItem label="Empty" data={EMPTY} />
+      <WidgetItem label="Empty List" data={EMPTY_LIST} />
     </div>
   )
 }
@@ -40,7 +48,6 @@ interface WidgetItemProps {
   label: string
   data: EntityData
 }
-
 function WidgetItem({ label, data }: WidgetItemProps) {
   const ref = useRef<HTMLDivElement>(null)
 

@@ -1,14 +1,15 @@
-import { EntityData, UnknownEntityRef } from "../db"
-import { EntityViewProps, ViewType } from "./index"
+import { EntityData, EntityRef, UnknownEntityRef, useCreateEntity } from "../db"
+import { EntityViewProps, ViewType, WidgetView } from "./index"
 import { NearbyWidgetProp } from "../computations/closeWidgetsComputation"
 import { isMap } from "./MapView"
 import { useMemo, useState } from "react"
 import PlaceResult = google.maps.places.PlaceResult
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
+import { registerViewType } from "./view-type-registry"
 
 export interface CampgroundFinderEntityProps {
   type: "campgroundFinder"
-  results?: PlaceResult[]
+  items?: EntityRef<PlaceResult>[]
 }
 
 function isCampgroundFinder(data: EntityData): data is CampgroundFinderEntityProps {
@@ -18,6 +19,8 @@ function isCampgroundFinder(data: EntityData): data is CampgroundFinderEntityPro
 function CampgroundFinderView({
   entity,
 }: EntityViewProps<CampgroundFinderEntityProps & NearbyWidgetProp>) {
+  const createEntity = useCreateEntity()
+
   const availableBounds = entity.data.nearbyWidgets.filter(
     (widget) => isMap(widget.data) && widget.data.bounds
   )
@@ -34,10 +37,42 @@ function CampgroundFinderView({
         type: "campground",
       },
       (results) => {
+        entity.data.items?.forEach((entity) => {
+          console.log(entity)
+
+          entity.destroy()
+        })
+
         if (results) {
-          entity.replace("results", JSON.parse(JSON.stringify(results)))
+          const resultEntities = results.map((result) => {
+            const data: any = {}
+
+            if (result.name) {
+              data.name = result.name
+            }
+
+            if (result.url) {
+              data.url = result.url
+            }
+
+            if (result?.photos && result?.photos[0]) {
+              data.thumbnail = result?.photos[0].getUrl({ maxHeight: 500, maxWidth: 500 })
+            }
+
+            if (result.rating) {
+              data.rating = result.rating
+            }
+
+            if (result.geometry?.location) {
+              data.latLng = result.geometry?.location?.toJSON()
+            }
+
+            return createEntity(data)
+          })
+
+          entity.replace("items", resultEntities)
         } else {
-          entity.retract("results")
+          entity.retract("items")
         }
       }
     )
@@ -57,27 +92,13 @@ function CampgroundFinderView({
         </button>
       ))}
 
-      {availableBounds.length === 0 && "place me near a map"}
-
-      {entity.data.results &&
-        entity.data.results.map((result, index) => (
-          <div className="flex flex gap-2" key={index}>
-            <div>
-              <div key={index}>
-                {result.url ? <a href={result.url}>{result.name}</a> : result.name}
-              </div>
-              <div>{result.rating}</div>
-            </div>
-          </div>
-        ))}
+      <WidgetView entity={entity} view="List" />
     </div>
   )
 }
 
-const viewDefition: ViewType = {
+registerViewType({
   name: "Campground finder",
   condition: isCampgroundFinder,
   view: CampgroundFinderView,
-}
-
-export default viewDefition
+})
