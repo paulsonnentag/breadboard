@@ -29,7 +29,13 @@ function getGeoMarkers(
     geoMarkers.push({ value: value.data.latLng, entity: value })
   }
 
+  if (value.data.item) {
+    // item view
+    geoMarkers = geoMarkers.concat(getGeoMarkers(value.data.item, visitedEntityIds))
+  }
+
   if (value.data.items) {
+    // list view
     geoMarkers = geoMarkers.concat(
       value.data.items.flatMap((value: any) => getGeoMarkers(value, visitedEntityIds))
     )

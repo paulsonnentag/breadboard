@@ -1,15 +1,13 @@
-import { createElement, FunctionComponent } from "react"
-import { EntityData, EntityRef } from "../db"
+import { createElement } from "react"
+import { EntityData } from "../db"
 
 import "./MapView"
 import "./CampgroundFinderView"
 import "./NamedEntityView"
 import "./ListView"
+import "./ItemView"
 import "./RawView"
-
-import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
 import { EntityViewProps, getSupportedViews } from "./view-type-registry"
-import classNames from "classnames"
 
 interface WidgetViewProps extends EntityViewProps<Partial<EntityData>> {
   view?: string
@@ -23,39 +21,8 @@ export function WidgetView({ entity, view }: WidgetViewProps) {
     : supportedViews[0]
 
   if (!selectedView) {
-    return <div>"no supported view"</div>
+    return <div>no supported view</div>
   }
 
-  const onMouseEnter = () => {
-    entity.replace("isHovered", true)
-  }
-
-  const onMouseLeave = () => {
-    entity.retract("isHovered")
-  }
-
-  return (
-    <div
-      className={classNames(
-        "border rounded bg-white shadow overflow-auto w-full h-full flex flex-col",
-        entity.data.isHovered ? "border-blue-500" : "border-gray-300"
-      )}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
-        <DragHandleDots2Icon />
-
-        {selectedView.name}
-
-        <div className="flex-1"></div>
-
-        <button onClick={() => entity.destroy()}>
-          <Cross2Icon />
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-auto">{createElement(selectedView.view, { entity })}</div>
-    </div>
-  )
+  return createElement(selectedView.view, { entity })
 }

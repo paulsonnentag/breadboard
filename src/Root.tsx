@@ -4,6 +4,7 @@ import { DbDoc, Fact, getEntities } from "./db"
 import { DbContext } from "./db-context"
 import { Board } from "./Board"
 import { useCallback, useMemo } from "react"
+import "./views"
 
 interface BreadboardProps {
   documentId: DocumentId

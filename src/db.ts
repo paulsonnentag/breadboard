@@ -8,7 +8,7 @@ interface Ref {
   __refId: string
 }
 
-function createRef(id: string) {
+export function createRef(id: string) {
   return { __refId: id }
 }
 
@@ -91,6 +91,10 @@ export class EntityRef<T extends Partial<EntityData>> {
         }
       }
     })
+  }
+
+  toRefId() {
+    return { __refId: this.id }
   }
 }
 

@@ -7,11 +7,13 @@ import {
   useEntities,
   useFacts,
 } from "./db"
-import React, { useRef, useState } from "react"
+import React, { createElement, useRef, useState } from "react"
 import classNames from "classnames"
 import { WidgetView } from "./views"
 import WidgetBar from "./WidgetBar"
 import DebugView from "./DebugView"
+import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
+import { getSupportedViews } from "./views/view-type-registry"
 
 export interface CreateWidgetDragData {
   type: "create"
@@ -77,7 +79,7 @@ export function Board() {
       onDragOver={onDragOver}
     >
       {widgets.map((widget) => (
-        <WidgetContainer widget={widget} key={widget.id} />
+        <WidgetContainer entity={widget} key={widget.id} />
       ))}
 
       <div className="fixed top-3 left-3">
@@ -114,10 +116,10 @@ export function getWidgets(
 }
 
 interface WidgetContainerProps {
-  widget: EntityRef<WidgetEntityProps>
+  entity: EntityRef<WidgetEntityProps>
 }
 
-function WidgetContainer({ widget }: WidgetContainerProps) {
+function WidgetContainer({ entity }: WidgetContainerProps) {
   const [isDragged, setIsDragged] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -132,7 +134,7 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
       "application/drag-data",
       JSON.stringify({
         type: "move",
-        entityId: widget.id,
+        entityId: entity.id,
         offsetX: evt.clientX - bounds.left,
         offsetY: evt.clientY - bounds.top,
       } as MoveWidgetDragData)
@@ -146,6 +148,9 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
     setTimeout(() => setIsDragged(false))
   }
 
+  const supportedViews = getSupportedViews(entity.data)
+  const selectedView = supportedViews[0]
+
   return (
     <div
       ref={ref}
@@ -156,13 +161,27 @@ function WidgetContainer({ widget }: WidgetContainerProps) {
         "opacity-0": isDragged,
       })}
       style={{
-        top: widget.data.y,
-        left: widget.data.x,
-        width: widget.data.width,
-        height: widget.data.height,
+        top: entity.data.y,
+        left: entity.data.x,
+        width: entity.data.width,
+        height: entity.data.height,
       }}
     >
-      <WidgetView entity={widget} />
+      <div className="rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
+        <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
+          <DragHandleDots2Icon />
+
+          {selectedView.name}
+
+          <div className="flex-1"></div>
+
+          <button onClick={() => entity.destroy()}>
+            <Cross2Icon />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-auto">{createElement(selectedView.view, { entity })}</div>
+      </div>
     </div>
   )
 }

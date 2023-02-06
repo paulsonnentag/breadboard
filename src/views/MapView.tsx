@@ -105,7 +105,6 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
           position: new LatLng(geoMarker.value),
         })
 
-        console.log("create")
         prevMarkers.push(mapsMarker)
       }
 
