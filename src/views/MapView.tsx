@@ -113,6 +113,7 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
         geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
       }`
+
       markerContent.onmouseenter = () => {
         geoMarker.entity.replace("isHovered", true)
       }
@@ -121,6 +122,7 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
       }
 
       mapsMarker.position = new LatLng(geoMarker.value)
+      mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
     }
   }, [entity.data.geoMarkers, mapRef.current])
 

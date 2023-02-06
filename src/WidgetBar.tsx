@@ -4,7 +4,7 @@ import { DragHandleDots2Icon } from "@radix-ui/react-icons"
 import colors from "tailwindcss/colors"
 import { MapEntityProps } from "./views/MapView"
 import { CreateWidgetDragData, WidgetEntityProps } from "./Board"
-import { CampgroundFinderEntityProps } from "./views/CampgroundFinderView"
+import { PoiFinderEntityProps } from "./views/PoiFinderView"
 import { ListEntityProps } from "./views/ListView"
 
 const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
@@ -16,10 +16,12 @@ const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
   },
 }
 
-const CAMPGROUND: CampgroundFinderEntityProps & Partial<WidgetEntityProps> = {
-  type: "campgroundFinder",
+const POI_FINDER: PoiFinderEntityProps & Partial<WidgetEntityProps> = {
+  type: "poiFinder",
+  placeType: "campground",
   width: 200,
   height: 300,
+  items: [],
 }
 
 const EMPTY: Partial<WidgetEntityProps> = {
@@ -37,7 +39,7 @@ export default function WidgetBar() {
   return (
     <div className="flex gap-1">
       <WidgetItem label="Map" data={MAP} />
-      <WidgetItem label="Campground finder" data={CAMPGROUND} />
+      <WidgetItem label="POI finder" data={POI_FINDER} />
       <WidgetItem label="Empty" data={EMPTY} />
       <WidgetItem label="Empty List" data={EMPTY_LIST} />
     </div>

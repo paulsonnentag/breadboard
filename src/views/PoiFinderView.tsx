@@ -6,19 +6,25 @@ import { useMemo, useState } from "react"
 import PlaceResult = google.maps.places.PlaceResult
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
 import { registerViewType } from "./view-type-registry"
+import { Option, Select } from "../Select"
 
-export interface CampgroundFinderEntityProps {
-  type: "campgroundFinder"
+export interface PoiFinderEntityProps {
+  type: "poiFinder"
+  placeType: string
   items?: EntityRef<PlaceResult>[]
 }
 
-function isCampgroundFinder(data: EntityData): data is CampgroundFinderEntityProps {
-  return data.type === "campgroundFinder"
+function isPoiFinder(data: EntityData): data is PoiFinderEntityProps {
+  return data.type === "poiFinder"
 }
 
-function CampgroundFinderView({
-  entity,
-}: EntityViewProps<CampgroundFinderEntityProps & NearbyWidgetProp>) {
+const POI_TYPE_OPTIONS: Option<string>[] = [
+  { value: "gas_station", name: "Gas station" },
+  { value: "campground", name: "Campground" },
+  { value: "tourist_attraction", name: "Tourist attraction" },
+]
+
+function PoiFinderView({ entity }: EntityViewProps<PoiFinderEntityProps & NearbyWidgetProp>) {
   const createEntity = useCreateEntity()
 
   const availableBounds = entity.data.nearbyWidgets.filter(
@@ -34,12 +40,10 @@ function CampgroundFinderView({
     placesService.nearbySearch(
       {
         bounds: bounds,
-        type: "campground",
+        type: entity.data.placeType,
       },
       (results) => {
-        entity.data.items?.forEach((entity) => {
-          console.log(entity)
-
+        entity.data.items?.forEach((entity: EntityRef<PlaceResult>) => {
           entity.destroy()
         })
 
@@ -78,9 +82,25 @@ function CampgroundFinderView({
     )
   }
 
+  const selectedOption = POI_TYPE_OPTIONS.find((option) => option.value === entity.data.placeType)
+
   return (
-    <div className="p-2 flex flex-col gap-2">
-      {availableBounds.map((entity) => (
+    <div className="p-2 flex flex-col gap-2 overflow-auto h-full">
+      <Select
+        selectedOption={selectedOption}
+        options={POI_TYPE_OPTIONS}
+        onChange={(option) => {
+          if (option) {
+            entity.replace("placeType", option.value)
+            entity.data.items?.forEach((entity: EntityRef<PlaceResult>) => {
+              entity.destroy()
+            })
+            entity.replace("items", [])
+          }
+        }}
+      />
+
+      {availableBounds.map((entity: UnknownEntityRef) => (
         <button
           className="p-1 bg-gray-200"
           key={entity.id}
@@ -92,13 +112,15 @@ function CampgroundFinderView({
         </button>
       ))}
 
-      <WidgetView entity={entity} view="List" />
+      <div className="flex-1 overflow-auto flex-shrink" style={{ minHeight: 0 }}>
+        <WidgetView entity={entity} view="List" />
+      </div>
     </div>
   )
 }
 
 registerViewType({
-  name: "Campground finder",
-  condition: isCampgroundFinder,
-  view: CampgroundFinderView,
+  name: "POI finder",
+  condition: isPoiFinder,
+  view: PoiFinderView,
 })

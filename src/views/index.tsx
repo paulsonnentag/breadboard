@@ -2,7 +2,7 @@ import { createElement } from "react"
 import { EntityData } from "../db"
 
 import "./MapView"
-import "./CampgroundFinderView"
+import "./PoiFinderView"
 import "./NamedEntityView"
 import "./ListView"
 import "./ItemView"
