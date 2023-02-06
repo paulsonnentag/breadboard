@@ -46,6 +46,10 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
       gestureHandling: "greedy",
     }))
 
+    for (const markers of markersRef.current) {
+      markers.map = currentMap
+    }
+
     const boundsChangedListener = currentMap.addListener("bounds_changed", () => {
       const bounds = currentMap.getBounds()
       if (bounds) {
@@ -79,28 +83,46 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
       return
     }
 
-    markersRef.current.forEach((marker: AdvancedMarkerView) => {
+    const geoMarkers = entity.data.geoMarkers
+
+    const markersToDelete = markersRef.current.slice(geoMarkers.length)
+    const prevMarkers = (markersRef.current = markersRef.current.slice(0, geoMarkers.length))
+
+    markersToDelete.forEach((marker: AdvancedMarkerView) => {
       marker.map = null
     })
 
-    markersRef.current = []
+    for (let i = 0; i < geoMarkers.length; i++) {
+      const geoMarker = geoMarkers[i]
+      let mapsMarker = prevMarkers[i] // reuse existing markers, if it already exists
 
-    for (const geoMarker of entity.data.geoMarkers) {
-      const markerElement = document.createElement("div")
-      markerElement.className = `w-[16px] h-[16px] rounded-full shadow ${
+      if (!mapsMarker) {
+        const element = document.createElement("div")
+
+        mapsMarker = new AdvancedMarkerView({
+          map: mapRef.current,
+          content: element,
+          position: new LatLng(geoMarker.value),
+        })
+
+        console.log("create")
+        prevMarkers.push(mapsMarker)
+      }
+
+      const markerContent = mapsMarker.content as HTMLDivElement
+
+      markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
         geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
       }`
+      markerContent.onmouseenter = () => {
+        geoMarker.entity.replace("isHovered", true)
+      }
+      markerContent.onmouseleave = () => {
+        geoMarker.entity.retract("isHovered")
+      }
 
-      markersRef.current.push(
-        new AdvancedMarkerView({
-          map: mapRef.current,
-          position: geoMarker.value,
-          content: markerElement,
-        })
-      )
+      mapsMarker.position = new LatLng(geoMarker.value)
     }
-
-    console.log("add markers")
   }, [entity.data.geoMarkers, mapRef.current])
 
   return (

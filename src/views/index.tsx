@@ -9,6 +9,7 @@ import "./RawView"
 
 import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
 import { EntityViewProps, getSupportedViews } from "./view-type-registry"
+import classNames from "classnames"
 
 interface WidgetViewProps extends EntityViewProps<Partial<EntityData>> {
   view?: string
@@ -35,7 +36,10 @@ export function WidgetView({ entity, view }: WidgetViewProps) {
 
   return (
     <div
-      className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full flex flex-col"
+      className={classNames(
+        "border rounded bg-white shadow overflow-auto w-full h-full flex flex-col",
+        entity.data.isHovered ? "border-blue-500" : "border-gray-300"
+      )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
