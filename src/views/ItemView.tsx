@@ -1,20 +1,21 @@
-import { EntityData, EntityRef, UnknownEntityRef } from "../db"
-import { EntityViewProps, ViewType, WidgetView } from "./index"
-import { registerViewType } from "./view-type-registry"
-import { createElement } from "react"
-import classNames from "classnames"
+import { EntityData, UnknownEntityRef } from "../db"
+import { WidgetView } from "./index"
+import { EntityViewProps, ViewType } from "./ViewType"
+import { FunctionComponent } from "react"
 
 export interface NamedEntityProps {
   type: "item"
   item: UnknownEntityRef
 }
 
-function ItemView({ entity }: EntityViewProps<NamedEntityProps>) {
+const ItemView: FunctionComponent<EntityViewProps<NamedEntityProps>> = ({ entity }) => {
   return <WidgetView entity={entity.data.item} />
 }
 
-registerViewType({
+const viewType: ViewType = {
   name: "Item",
   condition: (data: EntityData) => data.type === "item",
   view: ItemView,
-})
+}
+
+export default viewType

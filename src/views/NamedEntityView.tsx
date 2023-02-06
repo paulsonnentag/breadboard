@@ -1,6 +1,6 @@
 import { EntityData } from "../db"
-import { EntityViewProps, registerViewType } from "./view-type-registry"
 import classNames from "classnames"
+import { EntityViewProps, ViewType } from "./ViewType"
 
 export interface NamedEntityProps {
   name: string
@@ -28,8 +28,10 @@ function NamedEntityView({ entity }: EntityViewProps<NamedEntityProps>) {
   )
 }
 
-registerViewType({
+const viewType: ViewType = {
   name: "Named",
   condition: (data: EntityData) => data.name !== undefined,
   view: NamedEntityView,
-})
+}
+
+export default viewType

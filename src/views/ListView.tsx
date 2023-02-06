@@ -1,16 +1,87 @@
-import { createRef, EntityData, UnknownEntityRef } from "../db"
-import { EntityViewProps, registerViewType } from "./view-type-registry"
+import {
+  createRef,
+  EntityData,
+  EntityRef,
+  UnknownEntityRef,
+  useCreateEntity,
+  useEntities,
+} from "../db"
 import { WidgetView } from "./index"
-import { CreateWidgetDragData } from "../Board"
-import { useRef } from "react"
+import { CreateWidgetDragData, DragData, WidgetEntityProps } from "../Board"
+import { useRef, useState } from "react"
+import classNames from "classnames"
+import { EntityViewProps, ViewType } from "./ViewType"
 
 export interface ListEntityProps {
   items: UnknownEntityRef[]
 }
 
-function ListView({ entity }: EntityViewProps<ListEntityProps>) {
+export interface ListViewProps extends EntityViewProps<ListEntityProps> {
+  allowDrop?: boolean
+}
+
+export function ListView({ entity, allowDrop = true }: ListViewProps) {
+  const [isDraggedOver, setIsDraggedOver] = useState(false)
+  const createEntity = useCreateEntity()
+  const entities = useEntities()
+
   return (
-    <div>
+    <div
+      onDragEnter={(evt) => {
+        if (allowDrop) {
+          evt.preventDefault()
+          setIsDraggedOver(true)
+        }
+      }}
+      onDragOver={(evt) => {
+        if (allowDrop) {
+          evt.preventDefault()
+          setIsDraggedOver(true)
+        }
+      }}
+      onDragLeave={() => {
+        if (allowDrop) {
+          setIsDraggedOver(false)
+        }
+      }}
+      onDrop={(evt) => {
+        if (!allowDrop) {
+          return
+        }
+
+        setIsDraggedOver(false)
+        evt.stopPropagation()
+        const dragData = JSON.parse(evt.dataTransfer.getData("application/drag-data")) as DragData
+
+        let widget: EntityRef<WidgetEntityProps> | undefined
+
+        switch (dragData.type) {
+          case "create":
+            widget = createEntity(dragData.entityData) as EntityRef<WidgetEntityProps>
+            break
+
+          case "move":
+            widget = entities[dragData.entityId] as EntityRef<WidgetEntityProps>
+            break
+        }
+
+        if (!widget) {
+          return
+        }
+
+        // this is a bit hacky, but because the board includes all entities that have a size and position, this is the only way to remove a widget from the board
+        widget.retract("x")
+        widget.retract("y")
+        widget.retract("width")
+        widget.retract("height")
+
+        entity.replace("items", entity.data.items.concat([widget]))
+      }}
+      className={classNames(
+        "border rounded-b h-full w-full",
+        isDraggedOver ? "border-blue-500" : "border-white"
+      )}
+    >
       {entity.data.items.map((item, index) => (
         <DraggableItem entity={item} key={index} />
       ))}
@@ -57,8 +128,10 @@ function DraggableItem({ entity }: EntityViewProps<Partial<EntityData>>) {
   )
 }
 
-registerViewType({
+const viewType: ViewType = {
   name: "List",
   condition: (data: EntityData) => data.items,
   view: ListView,
-})
+}
+
+export default viewType

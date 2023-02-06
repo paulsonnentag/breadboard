@@ -1,13 +1,23 @@
 import { createElement } from "react"
 import { EntityData } from "../db"
 
-import "./MapView"
-import "./PoiFinderView"
-import "./NamedEntityView"
-import "./ListView"
-import "./ItemView"
-import "./RawView"
-import { EntityViewProps, getSupportedViews } from "./view-type-registry"
+import mapViewDef from "./MapView"
+import poiFinderViewDef from "./PoiFinderView"
+import nameEntityViewDef from "./NamedEntityView"
+import listViewDef from "./ListView"
+import itemViewDef from "./ItemView"
+import rawViewDef from "./RawView"
+import { getSupportedViews, setViewTypes } from "./view-type-registry"
+import { EntityViewProps } from "./ViewType"
+
+setViewTypes([
+  mapViewDef,
+  poiFinderViewDef,
+  nameEntityViewDef,
+  listViewDef,
+  itemViewDef,
+  rawViewDef,
+])
 
 interface WidgetViewProps extends EntityViewProps<Partial<EntityData>> {
   view?: string

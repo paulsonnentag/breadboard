@@ -1,15 +1,14 @@
 import { EntityData } from "../db"
-import { EntityViewProps, ViewType } from "./index"
 import { useEffect, useId, useRef } from "react"
 import Map = google.maps.Map
 import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
-import { registerViewType } from "./view-type-registry"
 import GeoMarkersComputation, {
   GeoMarkersComputationProp,
 } from "../computations/geoMarkersComputation"
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
+import { EntityViewProps, ViewType } from "./ViewType"
 
 export interface MapEntityProps {
   center: LatLngLiteral
@@ -143,8 +142,10 @@ export function isMap(data: EntityData): data is MapEntityProps {
   return data.center !== undefined
 }
 
-registerViewType({
+const viewType: ViewType = {
   name: "Map",
   condition: isMap,
   view: MapView,
-})
+}
+
+export default viewType

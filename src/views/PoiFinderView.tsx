@@ -1,12 +1,12 @@
 import { EntityData, EntityRef, UnknownEntityRef, useCreateEntity } from "../db"
-import { EntityViewProps, ViewType, WidgetView } from "./index"
 import { NearbyWidgetProp } from "../computations/closeWidgetsComputation"
 import { isMap } from "./MapView"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
+import { Option, Select } from "../Select"
+import { ListEntityProps, ListView } from "./ListView"
+import { EntityViewProps, ViewType } from "./ViewType"
 import PlaceResult = google.maps.places.PlaceResult
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
-import { registerViewType } from "./view-type-registry"
-import { Option, Select } from "../Select"
 
 export interface PoiFinderEntityProps {
   type: "poiFinder"
@@ -113,14 +113,15 @@ function PoiFinderView({ entity }: EntityViewProps<PoiFinderEntityProps & Nearby
       ))}
 
       <div className="flex-1 overflow-auto flex-shrink" style={{ minHeight: 0 }}>
-        <WidgetView entity={entity} view="List" />
+        <ListView entity={entity as any} allowDrop={false} />
       </div>
     </div>
   )
 }
 
-registerViewType({
+const viewType: ViewType = {
   name: "POI finder",
   condition: isPoiFinder,
   view: PoiFinderView,
-})
+}
+export default viewType
