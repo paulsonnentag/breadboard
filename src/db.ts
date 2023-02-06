@@ -44,6 +44,7 @@ export class EntityRef<T extends Partial<EntityData>> {
 
         if (fact.e === this.id && fact.key === key) {
           delete facts[index]
+          index -= 1
         }
       }
 
@@ -75,6 +76,7 @@ export class EntityRef<T extends Partial<EntityData>> {
         const fact = facts[index]
         if (fact.e === this.id && fact.key === key) {
           delete facts[index]
+          index -= 1
         }
       }
     })
@@ -88,6 +90,7 @@ export class EntityRef<T extends Partial<EntityData>> {
         const fact = facts[index]
         if (fact.e === this.id) {
           delete facts[index]
+          index -= 1
         }
       }
     })
