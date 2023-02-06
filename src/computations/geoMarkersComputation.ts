@@ -1,6 +1,10 @@
-import { EntityData, EntityRef } from "../db"
+import { EntityData, EntityRef, UnknownEntityRef } from "../db"
 import { Computation, ComputedValue } from "./index"
 import LatLngLiteral = google.maps.LatLngLiteral
+
+export interface GeoMarkersComputationProp {
+  geoMarkers: ComputedValue<LatLngLiteral>[]
+}
 
 const geoMarkersComputation: Computation<ComputedValue<LatLngLiteral>[]> = {
   name: "geoMarkers",

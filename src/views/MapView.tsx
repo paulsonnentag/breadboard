@@ -1,11 +1,15 @@
 import { EntityData } from "../db"
 import { EntityViewProps, ViewType } from "./index"
-import { useEffect, useRef } from "react"
+import { useEffect, useId, useRef } from "react"
 import Map = google.maps.Map
 import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
 import { registerViewType } from "./view-type-registry"
+import GeoMarkersComputation, {
+  GeoMarkersComputationProp,
+} from "../computations/geoMarkersComputation"
+import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 
 export interface MapEntityProps {
   center: LatLngLiteral
@@ -13,8 +17,10 @@ export interface MapEntityProps {
   bounds?: LatLngBoundsLiteral
 }
 
-function MapView({ entity }: EntityViewProps<MapEntityProps>) {
+function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputationProp>) {
+  const mapId = useId()
   const mapRef = useRef<Map>()
+  const markersRef = useRef<AdvancedMarkerView[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -24,6 +30,7 @@ function MapView({ entity }: EntityViewProps<MapEntityProps>) {
     }
 
     const currentMap = (mapRef.current = new google.maps.Map(currentContainer, {
+      mapId,
       center: new LatLng(entity.data.center),
       zoom: entity.data.zoom ?? 11,
 
@@ -66,6 +73,33 @@ function MapView({ entity }: EntityViewProps<MapEntityProps>) {
       boundsChangedListener.remove()
     }
   }, [containerRef.current])
+
+  useEffect(() => {
+    if (!mapRef.current) {
+      return
+    }
+
+    markersRef.current.forEach((marker: AdvancedMarkerView) => {
+      marker.map = null
+    })
+
+    markersRef.current = []
+
+    for (const geoMarker of entity.data.geoMarkers) {
+      const markerElement = document.createElement("div")
+      markerElement.className = "w-[16px] h-[16px] bg-red-500 rounded-full shadow"
+
+      markersRef.current.push(
+        new AdvancedMarkerView({
+          map: mapRef.current,
+          position: geoMarker.value,
+          content: markerElement,
+        })
+      )
+    }
+
+    console.log("add markers")
+  }, [entity.data.geoMarkers, mapRef.current])
 
   return (
     <div
