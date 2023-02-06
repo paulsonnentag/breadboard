@@ -87,7 +87,9 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
 
     for (const geoMarker of entity.data.geoMarkers) {
       const markerElement = document.createElement("div")
-      markerElement.className = "w-[16px] h-[16px] bg-red-500 rounded-full shadow"
+      markerElement.className = `w-[16px] h-[16px] rounded-full shadow ${
+        geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
+      }`
 
       markersRef.current.push(
         new AdvancedMarkerView({

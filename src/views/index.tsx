@@ -25,8 +25,20 @@ export function WidgetView({ entity, view }: WidgetViewProps) {
     return <div>"no supported view"</div>
   }
 
+  const onMouseEnter = () => {
+    entity.replace("isHovered", true)
+  }
+
+  const onMouseLeave = () => {
+    entity.retract("isHovered")
+  }
+
   return (
-    <div className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
+    <div
+      className="border-b-gray-300 rounded bg-white shadow overflow-auto w-full h-full flex flex-col"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
         <DragHandleDots2Icon />
 
