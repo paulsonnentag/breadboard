@@ -43,10 +43,6 @@ function PoiFinderView({ entity }: EntityViewProps<PoiFinderEntityProps & Nearby
         type: entity.data.placeType,
       },
       (results) => {
-        entity.data.items?.forEach((entity: EntityRef<PlaceResult>) => {
-          entity.destroy()
-        })
-
         if (results) {
           const resultEntities = results.map((result) => {
             const data: any = {}
@@ -92,9 +88,6 @@ function PoiFinderView({ entity }: EntityViewProps<PoiFinderEntityProps & Nearby
         onChange={(option) => {
           if (option) {
             entity.replace("placeType", option.value)
-            entity.data.items?.forEach((entity: EntityRef<PlaceResult>) => {
-              entity.destroy()
-            })
             entity.replace("items", [])
           }
         }}
