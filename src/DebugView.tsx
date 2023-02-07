@@ -8,7 +8,7 @@ export default function DebugView() {
   const [isDebugMode, setIsDebugMode] = useState(false)
 
   return (
-    <div className="fixed top-3 right-3 bottom-3 pt-10 w-[300px] flex flex-col">
+    <div className="fixed top-3 right-3 bottom-3 pt-10 w-[300px] flex flex-col pointer-events-none">
       <div className="absolute top-0 right-0">
         <label className="flex gap-1 whitespace-nowrap pointer-events-auto">
           <input

@@ -161,8 +161,7 @@ function WidgetContainer({ entity }: WidgetContainerProps) {
       onMouseOver={() => entity.replace("isHovered", true)}
       onMouseLeave={() => entity.retract("isHovered")}
       style={{
-        top: entity.data.y,
-        left: entity.data.x,
+        transform: `translate(${entity.data.x}px,${entity.data.y}px)`,
         width: entity.data.width,
         height: entity.data.height,
       }}
