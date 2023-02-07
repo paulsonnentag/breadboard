@@ -9,9 +9,13 @@ export interface NamedEntityProps {
   isHovered?: boolean
 }
 
+export interface IsClickedProp {
+  isClicked: boolean
+}
+
 function NamedEntityView({
   entity,
-}: EntityViewProps<NamedEntityProps & InfoFieldsComputationProp>) {
+}: EntityViewProps<NamedEntityProps & InfoFieldsComputationProp & IsClickedProp>) {
   return (
     <div
       className={classNames("flex gap-2 rounded p-1", {
@@ -19,6 +23,14 @@ function NamedEntityView({
       })}
       onMouseEnter={() => entity.replace("isHovered", true)}
       onMouseLeave={() => entity.retract("isHovered")}
+      onClick={() => {
+        // emulate click event
+        entity.replace("isClicked", true)
+
+        setInterval(() => {
+          entity.retract("isClicked")
+        })
+      }}
     >
       <div
         className="w-[50px] h-[50px] bg-gray-200 rounded bg-cover flex-shrink-0"

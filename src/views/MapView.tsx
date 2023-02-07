@@ -120,6 +120,15 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
         geoMarker.entity.retract("isHovered")
       }
 
+      mapsMarker.addListener("click", () => {
+        // emulate click event
+        geoMarker.entity.replace("isClicked", true)
+
+        setInterval(() => {
+          geoMarker.entity.retract("isClicked")
+        })
+      })
+
       mapsMarker.position = new LatLng(geoMarker.value)
       mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
     }

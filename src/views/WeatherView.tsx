@@ -4,6 +4,7 @@ import { GeoMarkersComputationProp } from "../computations/geoMarkersComputation
 import { Option, Select } from "../Select"
 import LatLngLiteral = google.maps.LatLngLiteral
 import { ComputedValue } from "../computations"
+import { useEffect, useMemo } from "react"
 
 export interface WeatherEntityProps {
   type: "weather"
@@ -27,13 +28,28 @@ function WeatherView({ entity }: EntityViewProps<WeatherEntityProps & GeoMarkers
     name: entityToName(geomarker.entity),
   }))
 
+  const clickedEntityId = options.find((option) => option.value.entity.data.isClicked)?.value.entity
+    .id
+
+  useEffect(() => {
+    if (clickedEntityId !== undefined) {
+      const clickedOption = options.find((option) => option.value.entity.id == clickedEntityId)
+      if (!clickedOption) {
+        return
+      }
+
+      entity.replace("selectedEntity", clickedOption.value.entity)
+      entity.replace("selectedLatLng", JSON.parse(JSON.stringify(clickedOption.value.value))) // remove automerge data
+    }
+  }, [clickedEntityId])
+
   if (options.length === 0 && selectedOption) {
     options = [selectedOption]
   }
 
   return (
     <div className="p-2">
-      Weather
+      Weather near
       <Select
         selectedOption={selectedOption ?? options[0]}
         options={options}
@@ -60,7 +76,7 @@ function entityToName(entity: UnknownEntityRef): string {
 }
 
 const viewType = {
-  name: "Weather for",
+  name: "Weather",
   condition: (data: EntityData) => data.type === "weather",
   view: WeatherView,
 }
