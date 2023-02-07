@@ -37,11 +37,12 @@ const EMPTY_LIST: Partial<WidgetEntityProps> & ListEntityProps = {
 
 export default function WidgetBar() {
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1 fixed top-3 left-3">
       <WidgetItem label="Map" data={MAP} />
       <WidgetItem label="POI finder" data={POI_FINDER} />
       <WidgetItem label="Empty" data={EMPTY} />
       <WidgetItem label="Empty List" data={EMPTY_LIST} />
+      <WidgetItem label="Weather" data={WEATHER} />
     </div>
   )
 }

@@ -82,13 +82,9 @@ export function Board() {
         <WidgetContainer entity={widget} key={widget.id} />
       ))}
 
-      <div className="fixed top-3 left-3">
-        <WidgetBar />
-      </div>
+      <WidgetBar />
 
-      <div className="fixed top-3 right-3">
-        <DebugView />
-      </div>
+      <DebugView />
     </div>
   )
 }
@@ -98,6 +94,7 @@ export interface WidgetEntityProps {
   y: number
   width: number
   height: number
+  isHovered: boolean
 }
 
 export function isWidget(entity: UnknownEntityRef): entity is EntityRef<WidgetEntityProps> {
@@ -159,7 +156,10 @@ function WidgetContainer({ entity }: WidgetContainerProps) {
       onDragEnd={onDragEnd}
       className={classNames("absolute", {
         "opacity-0": isDragged,
+        "shadow-xl": entity.data.isHovered,
       })}
+      onMouseOver={() => entity.replace("isHovered", true)}
+      onMouseLeave={() => entity.retract("isHovered")}
       style={{
         top: entity.data.y,
         left: entity.data.x,
