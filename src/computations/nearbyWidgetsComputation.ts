@@ -1,6 +1,6 @@
 import { Computation, ComputedValue } from "./index"
 import { getWidgets, isWidget, WidgetEntityProps } from "../Board"
-import { EntityRef, UnknownEntityRef } from "../db"
+import { EntityMap, EntityRef, UnknownEntityRef } from "../db"
 
 const MIN_DISTANCE = 100
 
@@ -8,22 +8,38 @@ export interface NearbyWidgetProp {
   nearbyWidgets: UnknownEntityRef[]
 }
 
-const closeWidgetsComputation: Computation<UnknownEntityRef[]> = {
+const nearbyWidgetsComputation: Computation<UnknownEntityRef[]> = {
   name: "nearbyWidgets",
   fn: (entity, entities) => {
     if (!isWidget(entity)) {
       return
     }
 
-    return getWidgets(entities).filter((widget) => {
-      if (widget.id === entity.id) {
-        return false
-      }
-
-      const distance = distanceBetweenWidgets(widget.data, entity.data)
-      return distance < MIN_DISTANCE
-    })
+    return getNearbyWidgets(entity, entities, { [entity.id]: true })
   },
+}
+
+// todo: this is bad and inefficient, but that doesn't matter for now
+
+function getNearbyWidgets(
+  entity: EntityRef<WidgetEntityProps>,
+  entities: EntityMap,
+  visitedEntityIds: { [id: string]: boolean } = {}
+): EntityRef<WidgetEntityProps>[] {
+  return getWidgets(entities).flatMap((widget) => {
+    if (visitedEntityIds[widget.id]) {
+      return []
+    }
+
+    visitedEntityIds[widget.id] = true
+
+    const distance = distanceBetweenWidgets(widget.data, entity.data)
+    if (distance < MIN_DISTANCE) {
+      return [widget].concat(getNearbyWidgets(widget, entities, visitedEntityIds))
+    }
+
+    return []
+  })
 }
 
 function distanceBetweenWidgets(rect1: WidgetEntityProps, rect2: WidgetEntityProps): number {
@@ -64,7 +80,7 @@ function distanceBetweenWidgets(rect1: WidgetEntityProps, rect2: WidgetEntityPro
   }
 }
 
-export default closeWidgetsComputation
+export default nearbyWidgetsComputation
 
 function distance(x1: number, y1: number, x2: number, y2: number) {
   return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))

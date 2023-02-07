@@ -1,5 +1,5 @@
 import { EntityMap, UnknownEntityRef } from "../db"
-import closeWidgetsComputation from "./closeWidgetsComputation"
+import nearbyWidgetsComputation from "./nearbyWidgetsComputation"
 import geoMarkersComputation from "./geoMarkersComputation"
 import nameComputation from "./nameComputation"
 import weatherComputation from "./weatherComputation"
@@ -15,7 +15,7 @@ export interface Computation<V> {
 }
 
 const Index: Computation<any>[] = [
-  closeWidgetsComputation,
+  nearbyWidgetsComputation,
   geoMarkersComputation,
   nameComputation,
   weatherComputation,

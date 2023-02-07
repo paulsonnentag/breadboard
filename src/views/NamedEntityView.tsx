@@ -1,11 +1,18 @@
 import { EntityData } from "../db"
 import classNames from "classnames"
 import { EntityViewProps, ViewType } from "./ViewType"
-import { InfoField, InfoFieldsComputationProp } from "../computations/weatherComputation"
+import {
+  InfoField,
+  InfoFieldsComputationProp,
+  WeatherInfoProps,
+} from "../computations/weatherComputation"
 
 export interface NamedEntityProps {
   name: string
   thumbnail?: string
+}
+
+export interface IsHoveredProp {
   isHovered?: boolean
 }
 
@@ -15,7 +22,9 @@ export interface IsClickedProp {
 
 function NamedEntityView({
   entity,
-}: EntityViewProps<NamedEntityProps & InfoFieldsComputationProp & IsClickedProp>) {
+}: EntityViewProps<
+  NamedEntityProps & InfoFieldsComputationProp & IsClickedProp & WeatherInfoProps & IsHoveredProp
+>) {
   return (
     <div
       className={classNames("flex gap-2 rounded p-1", {
@@ -38,15 +47,11 @@ function NamedEntityView({
           backgroundImage: entity.data.thumbnail && `url(${entity.data.thumbnail})`,
         }}
       />
-      <div>
-        {entity.data.name}
-
-        {entity.data.infoFields &&
-          entity.data.infoFields.map(({ label, value }: InfoField, index: number) => (
-            <div key={index}>
-              {label} {value}
-            </div>
-          ))}
+      <div className="flex justify-between flex-1">
+        <div>{entity.data.name}</div>
+        {entity.data.weatherPredictions && (
+          <div>{entity.data.weatherPredictions[0].temperature} C</div>
+        )}
       </div>
     </div>
   )

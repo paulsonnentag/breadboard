@@ -9,6 +9,8 @@ import GeoMarkersComputation, {
 } from "../computations/geoMarkersComputation"
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 import { EntityViewProps, ViewType } from "./ViewType"
+import MapsEventListener = google.maps.MapsEventListener
+import { list } from "postcss"
 
 export interface MapEntityProps {
   center: LatLngLiteral
@@ -19,6 +21,7 @@ export interface MapEntityProps {
 function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputationProp>) {
   const mapId = useId()
   const mapRef = useRef<Map>()
+  const listenersRef = useRef<MapsEventListener[]>([])
   const markersRef = useRef<AdvancedMarkerView[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -87,6 +90,11 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
     const markersToDelete = markersRef.current.slice(geoMarkers.length)
     const prevMarkers = (markersRef.current = markersRef.current.slice(0, geoMarkers.length))
 
+    listenersRef.current.forEach((listener) => {
+      listener.remove()
+    })
+    listenersRef.current = []
+
     markersToDelete.forEach((marker: AdvancedMarkerView) => {
       marker.map = null
     })
@@ -120,7 +128,7 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
         geoMarker.entity.retract("isHovered")
       }
 
-      mapsMarker.addListener("click", () => {
+      const listener = mapsMarker.addListener("click", () => {
         // emulate click event
         geoMarker.entity.replace("isClicked", true)
 
@@ -128,6 +136,8 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
           geoMarker.entity.retract("isClicked")
         })
       })
+
+      listenersRef.current.push(listener)
 
       mapsMarker.position = new LatLng(geoMarker.value)
       mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0

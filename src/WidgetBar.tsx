@@ -7,6 +7,7 @@ import { CreateWidgetDragData, WidgetEntityProps } from "./Board"
 import { PoiFinderEntityProps } from "./views/PoiFinderView"
 import { ListEntityProps } from "./views/ListView"
 import { WeatherEntityProps } from "./views/WeatherView"
+import { CalendarEntityProps } from "./views/CalendarView"
 
 const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
   width: 300,
@@ -20,7 +21,7 @@ const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
 const POI_FINDER: PoiFinderEntityProps & Partial<WidgetEntityProps> = {
   type: "poiFinder",
   placeType: "campground",
-  width: 200,
+  width: 300,
   height: 300,
   items: [],
 }
@@ -42,6 +43,12 @@ const WEATHER: Partial<WidgetEntityProps> & WeatherEntityProps = {
   height: 200,
 }
 
+const CALENDAR: Partial<WidgetEntityProps> & CalendarEntityProps = {
+  type: "calendar",
+  width: 800,
+  height: 600,
+}
+
 export default function WidgetBar() {
   return (
     <div className="flex gap-1 fixed top-3 left-3">
@@ -50,6 +57,7 @@ export default function WidgetBar() {
       <WidgetItem label="Empty" data={EMPTY} />
       <WidgetItem label="Empty List" data={EMPTY_LIST} />
       <WidgetItem label="Weather" data={WEATHER} />
+      <WidgetItem label="Calendar" data={CALENDAR} />
     </div>
   )
 }

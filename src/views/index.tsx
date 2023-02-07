@@ -10,11 +10,13 @@ import rawViewDef from "./RawView"
 import weatherViewDef from "./WeatherView"
 import { getSupportedViews, setViewTypes } from "./view-type-registry"
 import { EntityViewProps } from "./ViewType"
+import calendarViewDef from "./CalendarView"
 
 setViewTypes([
   mapViewDef,
   poiFinderViewDef,
   weatherViewDef,
+  calendarViewDef,
   nameEntityViewDef,
   listViewDef,
   itemViewDef,

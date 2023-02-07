@@ -1,7 +1,8 @@
-import { Computation } from "./index"
-import seed from "seed-random"
+import { Computation, ComputedValue } from "./index"
 import { GeoMarkersComputationProp } from "./geoMarkersComputation"
 import { EntityRef } from "../db"
+import LatLngLiteral = google.maps.LatLngLiteral
+import moment from "moment"
 
 export interface InfoField {
   label?: string
@@ -12,28 +13,65 @@ export interface InfoFieldsComputationProp {
   infoFields: []
 }
 
-// this is a bit hacky here because we are not computing facts for the entity but instead use it to add
-// facts to it's connected entities
+export interface WeatherPrediction {
+  timestamp: number
+  temperature: string
+}
 
-const weatherInfoComputation: Computation<undefined> = {
-  name: "weatherInfo",
-  fn: (entity) => {
-    if (entity.data.type === "weather") {
-      for (const geoPoint of (entity as EntityRef<GeoMarkersComputationProp>).data.geoMarkers) {
-        let infoFields = geoPoint.entity.data.infoFields as InfoField[]
+export interface WeatherInfoProps {
+  isWeatherDataLoading: boolean
+  weatherData?: any
+  weatherPredictions: WeatherPrediction[]
+}
 
-        if (!infoFields) {
-          infoFields = geoPoint.entity.data.infoFields = []
-        }
+function loadWeatherInfo(marker: ComputedValue<LatLngLiteral>) {
+  const entity = marker.entity
 
-        infoFields.push({
-          label: "Temp",
-          value: `${Math.round(seed(geoPoint.entity.id)() * 100)} ° F`,
-        })
-      }
+  const { isWeatherDataLoading, weatherData } = entity.data
+
+  if (isWeatherDataLoading || weatherData) {
+    return
+  }
+
+  entity.replace("isWeatherDataLoading", true)
+
+  fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${marker.value.lat}&longitude=${marker.value.lng}&hourly=temperature_2m`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      entity.replace("weatherData", data)
+      entity.retract("isWeatherDataLoading")
+    })
+}
+
+// this is a bit hacky here because we are doing some side effects in the computation to fetch the weather data
+// from the api and store it in the entity
+
+const weatherInfoComputation: Computation<WeatherPrediction[] | undefined> = {
+  name: "weatherPredictions",
+  fn: (entity: EntityRef<GeoMarkersComputationProp & WeatherInfoProps>) => {
+    if (!entity.data.geoMarkers) {
+      return undefined
     }
 
-    return undefined
+    const ownMarker = entity.data.geoMarkers.find((marker) => marker.entity.id === entity.id)
+
+    if (ownMarker) {
+      loadWeatherInfo(ownMarker)
+    }
+
+    if (entity.data.weatherData) {
+      const { time, temperature_2m } = entity.data.weatherData.hourly
+
+      return (time as string[]).map(
+        (timestampText, index) =>
+          ({
+            timestamp: moment(timestampText).unix() * 1000,
+            temperature: temperature_2m[index],
+          } as WeatherPrediction)
+      )
+    }
   },
 }
 

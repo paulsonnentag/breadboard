@@ -45,7 +45,7 @@ export default function DebugView() {
                   displayDataTypes={false}
                   src={entity.data}
                   collapsed={true}
-                  enableClipboard={false}
+                  enableClipboard={true}
                   name={entity.id.slice(0, 7)}
                   theme="grayscale:inverted"
                 />

@@ -1,5 +1,5 @@
 import { EntityData, EntityRef, UnknownEntityRef, useCreateEntity } from "../db"
-import { NearbyWidgetProp } from "../computations/closeWidgetsComputation"
+import { NearbyWidgetProp } from "../computations/nearbyWidgetsComputation"
 import { isMap } from "./MapView"
 import { useMemo } from "react"
 import { Option, Select } from "../Select"
