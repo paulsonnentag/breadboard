@@ -21,6 +21,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-json-view": "^1.21.3",
+    "seed-random": "^2.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -29,6 +30,7 @@
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
+    "@types/seed-random": "^2.2.1",
     "@types/uuid": "^8.3.4",
     "@vitejs/plugin-react": "^2.1.0",
     "autoprefixer": "^10.4.13",

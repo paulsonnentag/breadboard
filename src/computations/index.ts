@@ -2,6 +2,7 @@ import { EntityMap, UnknownEntityRef } from "../db"
 import closeWidgetsComputation from "./closeWidgetsComputation"
 import geoMarkersComputation from "./geoMarkersComputation"
 import nameComputation from "./nameComputation"
+import weatherComputation from "./weatherComputation"
 
 export interface ComputedValue<T> {
   value: T
@@ -13,7 +14,12 @@ export interface Computation<V> {
   name: string
 }
 
-const Index: Computation<any>[] = [closeWidgetsComputation, geoMarkersComputation, nameComputation]
+const Index: Computation<any>[] = [
+  closeWidgetsComputation,
+  geoMarkersComputation,
+  nameComputation,
+  weatherComputation,
+]
 
 export function applyComputation(entity: UnknownEntityRef, entities: EntityMap) {
   for (const computation of Index) {

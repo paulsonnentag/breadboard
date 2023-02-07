@@ -29,6 +29,7 @@ export default function DebugView() {
           {Object.values(entities).map((entity: UnknownEntityRef) => {
             return (
               <div
+                key={entity.id}
                 onMouseOver={() => {
                   entity.replace("isHovered", true)
                 }}
@@ -41,7 +42,6 @@ export default function DebugView() {
                 )}
               >
                 <ReactJson
-                  key={entity.id}
                   displayDataTypes={false}
                   src={entity.data}
                   collapsed={true}
