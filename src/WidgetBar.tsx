@@ -6,6 +6,7 @@ import { MapEntityProps } from "./views/MapView"
 import { CreateWidgetDragData, WidgetEntityProps } from "./Board"
 import { PoiFinderEntityProps } from "./views/PoiFinderView"
 import { ListEntityProps } from "./views/ListView"
+import { WeatherEntityProps } from "./views/WeatherView"
 
 const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
   width: 300,
@@ -33,6 +34,12 @@ const EMPTY_LIST: Partial<WidgetEntityProps> & ListEntityProps = {
   items: [],
   width: 300,
   height: 300,
+}
+
+const WEATHER: Partial<WidgetEntityProps> & WeatherEntityProps = {
+  type: "weather",
+  width: 400,
+  height: 200,
 }
 
 export default function WidgetBar() {

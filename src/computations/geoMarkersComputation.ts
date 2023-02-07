@@ -25,6 +25,12 @@ function getGeoMarkers(
 
   visitedEntityIds[value.id] = true
 
+  // map
+  if (value.data.center) {
+    geoMarkers.push({ value: value.data.center, entity: value })
+  }
+
+  // poi result
   if (value.data.latLng) {
     geoMarkers.push({ value: value.data.latLng, entity: value })
   }

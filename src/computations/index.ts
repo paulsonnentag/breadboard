@@ -1,11 +1,11 @@
-import { EntityData, EntityMap, EntityRef, UnknownEntityRef } from "../db"
-import { WidgetEntityProps } from "../Board"
+import { EntityMap, UnknownEntityRef } from "../db"
 import closeWidgetsComputation from "./closeWidgetsComputation"
 import geoMarkersComputation from "./geoMarkersComputation"
+import nameComputation from "./nameComputation"
 
 export interface ComputedValue<T> {
   value: T
-  entity: EntityData
+  entity: UnknownEntityRef
 }
 
 export interface Computation<V> {
@@ -13,7 +13,7 @@ export interface Computation<V> {
   name: string
 }
 
-const Index: Computation<any>[] = [closeWidgetsComputation, geoMarkersComputation]
+const Index: Computation<any>[] = [closeWidgetsComputation, geoMarkersComputation, nameComputation]
 
 export function applyComputation(entity: UnknownEntityRef, entities: EntityMap) {
   for (const computation of Index) {

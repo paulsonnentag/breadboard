@@ -7,12 +7,14 @@ import nameEntityViewDef from "./NamedEntityView"
 import listViewDef from "./ListView"
 import itemViewDef from "./ItemView"
 import rawViewDef from "./RawView"
+import weatherViewDef from "./WeatherView"
 import { getSupportedViews, setViewTypes } from "./view-type-registry"
 import { EntityViewProps } from "./ViewType"
 
 setViewTypes([
   mapViewDef,
   poiFinderViewDef,
+  weatherViewDef,
   nameEntityViewDef,
   listViewDef,
   itemViewDef,
