@@ -1,10 +1,18 @@
 import { Widget } from "./index"
 import LatLngLiteral = google.maps.LatLngLiteral
 import Map = google.maps.Map
-import { useEffect, useId, useRef } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 import LatLng = google.maps.LatLng
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
-import { LocationContextView, LocationWidget, LocationWidgetView } from "./LocationWidget"
+import {
+  LocationContextView,
+  LocationOverride,
+  LocationWidget,
+  LocationWidgetView,
+} from "./LocationWidget"
+import debounce from "lodash.debounce"
+import LatLngBounds = google.maps.LatLngBounds
+import GeocoderResult = google.maps.GeocoderResult
 
 export interface MapWidget {
   type: "map"
@@ -22,6 +30,8 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
   const mapRef = useRef<Map>()
   const markersRef = useRef<AdvancedMarkerView[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
+  const [currentOverride, setCurrentOverride] = useState<LocationOverride>()
+  const geoCoder = useMemo(() => new google.maps.Geocoder(), [])
 
   useEffect(() => {
     const currentContainer = containerRef.current
@@ -51,36 +61,36 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
       markers.map = currentMap
     }
 
-    /*
-    const boundsChangedListener = currentMap.addListener("bounds_changed", () => {
-      const bounds = currentMap.getBounds()
-      if (bounds) {
-        entity.replace("bounds", bounds.toJSON())
-      }
-    })
-
-    const centerChangedListener = currentMap.addListener("center_changed", () => {
+    const onChangeMapView = debounce(() => {
       const center = currentMap.getCenter()
-      if (center) {
-        entity.replace("center", center.toJSON())
-      }
-    })
 
-    const zoomChangedListener = currentMap.addListener("zoom_changed", () => {
-      const zoom = currentMap.getZoom()
-      if (zoom !== undefined) {
-        entity.replace("zoom", zoom)
+      if (center && !center.equals(new LatLng(widget.locationWidget.latLng))) {
+        geoCoder.geocode({ location: center }, (results) => {
+          const mapBounds = currentMap.getBounds()
+
+          if (!results || !mapBounds) {
+            return
+          }
+
+          let biggestContainedResult = getBiggestContainedResult(mapBounds, results)
+
+          setCurrentOverride({
+            name: biggestContainedResult.formatted_address,
+            latLng: center.toJSON(),
+          })
+        })
       }
-    })
+    }, 500)
+
+    const centerChangedListener = currentMap.addListener("center_changed", onChangeMapView)
+    const boundsChangedListener = currentMap.addListener("bounds_changed", onChangeMapView)
+    const zoomChangedListener = currentMap.addListener("zoom_changed", onChangeMapView)
 
     return () => {
       centerChangedListener.remove()
       zoomChangedListener.remove()
       boundsChangedListener.remove()
     }
-
-
-     */
   }, [containerRef.current])
 
   useEffect(() => {
@@ -158,8 +168,17 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
         <div className="text-green-600 p-2">Map</div>
 
         <LocationContextView
+          override={currentOverride}
+          onResetOverride={() => {
+            setCurrentOverride(undefined)
+          }}
           widget={widget.locationWidget}
-          onChange={(fn) => onChange((widget) => fn(widget.locationWidget))}
+          onChange={(fn) =>
+            onChange((widget) => {
+              setCurrentOverride(undefined)
+              fn(widget.locationWidget)
+            })
+          }
         />
       </div>
 
@@ -174,4 +193,24 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
       ></div>
     </div>
   )
+}
+
+function getBiggestContainedResult(
+  bounds: LatLngBounds,
+  results: GeocoderResult[]
+): GeocoderResult {
+  for (const result of results) {
+    if (!result.geometry.bounds) {
+      continue
+    }
+
+    if (
+      !bounds.contains(result.geometry.bounds.getNorthEast()) ||
+      !bounds.contains(result.geometry.bounds.getSouthWest())
+    ) {
+      return result
+    }
+  }
+
+  return results[0]
 }

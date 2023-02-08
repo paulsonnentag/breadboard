@@ -17,8 +17,8 @@ const INITIAL_WIDGETS: BoardWidget[] = [
   {
     x: 100,
     y: 100,
-    width: 300,
-    height: 300,
+    width: 600,
+    height: 600,
     widget: {
       type: "map",
       locationWidget: {

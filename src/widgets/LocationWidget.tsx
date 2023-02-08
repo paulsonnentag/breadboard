@@ -2,6 +2,7 @@ import LatLngLiteral = google.maps.LatLngLiteral
 import { useOnClickOutside } from "../hooks"
 import { useEffect, useMemo, useRef, useState } from "react"
 import AutocompletePrediction = google.maps.places.AutocompletePrediction
+import { ArrowUpIcon, ResetIcon } from "@radix-ui/react-icons"
 
 export interface LocationWidget {
   type: "location"
@@ -59,7 +60,7 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
   console.log(predictions)
 
   return (
-    <div className="p-2 flex flex-col gap-1">
+    <div className="p-2 flex flex-col gap-1 h-full">
       <input
         className="text-base"
         value={search}
@@ -73,7 +74,7 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
         {predictions.map((prediction, index) => (
           <div
             key={index}
-            className="bg-gray-200 rounded-md p-2"
+            className="bg-gray-200 rounded-md p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
             onClick={() => onSelectPlace(prediction.place_id)}
           >
             {prediction.description}
@@ -84,7 +85,24 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
   )
 }
 
-export function LocationContextView({ widget, onChange }: LocationWidgetViewProps) {
+export interface LocationOverride {
+  latLng: LatLngLiteral
+  name: string
+}
+
+interface LocationWidgetViewProps {
+  widget: LocationWidget
+  override?: LocationOverride
+  onChange: (fn: (widget: LocationWidget) => void) => void
+  onResetOverride?: () => void
+}
+
+export function LocationContextView({
+  widget,
+  override,
+  onChange,
+  onResetOverride,
+}: LocationWidgetViewProps) {
   const ref = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -92,14 +110,45 @@ export function LocationContextView({ widget, onChange }: LocationWidgetViewProp
 
   return (
     <div className="relative">
-      <div
-        className="bg-gray-200 rounded-md px-2 py-1 text-purple-700"
-        onClick={(evt) => {
-          setIsOpen((isOpen) => !isOpen)
-          evt.stopPropagation()
-        }}
-      >
-        {widget.name}
+      <div className="bg-gray-200 rounded-md px-2 text-purple-700 flex text-xs items-center">
+        <div className="p-1 font-bold">L</div>
+        {override ? (
+          <>
+            <div
+              className="bg-purple-600 text-white p-2 flex gap-1"
+              onClick={(evt) => {
+                console.log("promote")
+
+                onChange((widget) => {
+                  widget.name = override?.name
+                  widget.latLng = override?.latLng
+                })
+              }}
+            >
+              {override.name}
+
+              <ArrowUpIcon />
+            </div>
+            <div
+              className="text-gray-500 p-2 flex gap-1"
+              onClick={(evt) => {
+                onResetOverride && onResetOverride()
+              }}
+            >
+              {widget.name} <ResetIcon />
+            </div>
+          </>
+        ) : (
+          <div
+            className="p-2"
+            onClick={(evt) => {
+              setIsOpen((isOpen) => !isOpen)
+              evt.stopPropagation()
+            }}
+          >
+            {widget.name}
+          </div>
+        )}
       </div>
 
       {isOpen && (
