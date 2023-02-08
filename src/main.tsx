@@ -7,6 +7,7 @@ import { createDatabaseDoc, DbDoc } from "./db"
 import "./index.css"
 import { LocalForageStorageAdapter } from "automerge-repo-storage-localforage"
 import { BrowserWebSocketClientAdapter } from "automerge-repo-network-websocket"
+import { BoardView, createBoardDoc } from "./AltBoard"
 
 const url = "ws://67.207.88.83" // cloud sync server on DigitalOcean
 
@@ -21,7 +22,8 @@ const params = new URLSearchParams(window.location.search)
 let documentId = params.get("documentId") as DocumentId
 
 if (!documentId) {
-  const handle = createDatabaseDoc(repo)
+  // const handle = createDatabaseDoc(repo)
+  const handle = createBoardDoc(repo)
   documentId = handle.documentId
   window.history.replaceState(null, "", `?documentId=${documentId}`)
 }
@@ -29,7 +31,7 @@ if (!documentId) {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <RepoContext.Provider value={repo}>
-      <Root documentId={documentId} />
+      <BoardView docId={documentId} />
     </RepoContext.Provider>
   </React.StrictMode>
 )
