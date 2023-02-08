@@ -21,7 +21,14 @@ const INITIAL_WIDGETS: BoardWidget[] = [
     height: 300,
     widget: {
       type: "map",
-      includedWidgets: [],
+      locationWidget: {
+        type: "location",
+        name: "current location",
+        latLng: {
+          lat: 50.775555,
+          lng: 6.083611,
+        },
+      },
     },
   },
   {
@@ -97,6 +104,8 @@ export function BoardView({ docId }: BoardViewDoc) {
     })
   }
 
+  const boardWidgets = doc.widgets
+
   return (
     <div
       className="overflow-hidden relative"
@@ -108,10 +117,11 @@ export function BoardView({ docId }: BoardViewDoc) {
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
     >
-      {doc.widgets.map((boardWidget, index) => (
+      {boardWidgets.map((boardWidget, index) => (
         <BoardWidgetView
           x={boardWidget.x}
           y={boardWidget.y}
+          boardWidgets={boardWidgets}
           width={boardWidget.width}
           height={boardWidget.height}
           widget={boardWidget.widget}
@@ -133,10 +143,20 @@ interface BoardWidgetView {
   width: number
   height: number
   widget: Widget
+  boardWidgets: BoardWidget[]
   onChange: (fn: (widget: Widget) => void) => void
 }
 
-function BoardWidgetView({ widget, x, y, width, height, onChange, index }: BoardWidgetView) {
+function BoardWidgetView({
+  widget,
+  boardWidgets,
+  x,
+  y,
+  width,
+  height,
+  onChange,
+  index,
+}: BoardWidgetView) {
   const [isDragged, setIsDragged] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -180,8 +200,12 @@ function BoardWidgetView({ widget, x, y, width, height, onChange, index }: Board
         height: height,
       }}
     >
-      <div className="rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
-        <WidgetView widget={widget} onChange={onChange} />
+      <div className="rounded bg-white shadow w-full h-full flex flex-col">
+        <WidgetView
+          widget={widget}
+          widgetsInScope={boardWidgets.map(({ widget }) => widget)}
+          onChange={onChange}
+        />
       </div>
     </div>
   )
