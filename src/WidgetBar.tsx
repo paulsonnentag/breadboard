@@ -92,7 +92,7 @@ function WidgetItem({ label, data }: WidgetItemProps) {
     <div
       ref={ref}
       onDragStart={onDragStart}
-      className="bg-gray-400 text-white p-2 rounded flex items-center gap-1"
+      className="bg-gray-400 text-white p-2 rounded-xl flex items-center gap-1"
       draggable={true}
     >
       <DragHandleDots2Icon color={colors.gray[300]} />

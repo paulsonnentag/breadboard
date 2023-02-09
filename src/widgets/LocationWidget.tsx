@@ -16,7 +16,7 @@ interface LocationWidgetViewProps {
   onChange: (fn: (widget: LocationWidget) => void) => void
 }
 
-export function LocationWidgetView({ widget, onChange }: LocationPickerViewProps) {
+export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps) {
   const [search, setSearch] = useState("")
   const [predictions, setPredictions] = useState<AutocompletePrediction[]>([])
   const autocomplete = useMemo(() => new google.maps.places.AutocompleteService(), [])
@@ -67,13 +67,13 @@ export function LocationWidgetView({ widget, onChange }: LocationPickerViewProps
         placeholder="Search ..."
       />
 
-      {!search && <div className="bg-purple-600 rounded-md text-white p-2">{widget.name}</div>}
+      {!search && <div className="bg-purple-600 rounded-xl text-white p-2">{widget.name}</div>}
 
       <div className="flex flex-col gap-1 flex-1 overflow-auto" style={{ minHeight: 0 }}>
         {predictions.map((prediction, index) => (
           <div
             key={index}
-            className="bg-gray-200 rounded-md p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
+            className="bg-gray-200 rounded-xl p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
             onClick={() => onSelectPlace(prediction.place_id)}
           >
             {prediction.description}
@@ -109,8 +109,7 @@ export function LocationPickerView({
 
   return (
     <div className="relative">
-      <div className="bg-gray-200 rounded-md px-2 text-purple-700 flex text-xs items-center">
-        <div className="p-1 font-bold">L</div>
+      <div className="bg-gray-200 rounded-xl px-2 text-purple-700 flex text-xs items-center">
         {override ? (
           <>
             <div
@@ -151,7 +150,7 @@ export function LocationPickerView({
       {isOpen && (
         <div
           ref={ref}
-          className="absolute -top-3 left-full w-[300px] h-[300px] bg-white rounded z-50 rounded-md shadow ml-3"
+          className="absolute -top-3 left-full w-[300px] h-[300px] bg-white z-50 rounded-xl shadow ml-3"
         >
           <LocationWidgetView widget={widget} onChange={onChange} />
         </div>
@@ -184,10 +183,8 @@ export function LocationStackView({
   const prevWidget = widgets[positiveMod(selectedWidgetIndex - 1, widgets.length)]
   const nextWidget = widgets[positiveMod(selectedWidgetIndex + 1, widgets.length)]
 
-  console.log("prev", (selectedWidgetIndex - 1) % widgets.length)
-
   return (
-    <div className="bg-gray-200 rounded-md p-2 text-purple-700 flex text-xs items-middle">
+    <div className="bg-gray-200 rounded-xl p-2 text-purple-700 flex text-xs items-middle">
       <button
         onClick={() => {
           onSelectWidgetId(prevWidget.id)

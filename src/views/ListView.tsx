@@ -78,7 +78,7 @@ export function ListView({ entity, allowDrop = true }: ListViewProps) {
         entity.replace("items", entity.data.items.concat([widget]))
       }}
       className={classNames(
-        "border rounded-b h-full w-full",
+        "border rounded-b-xl h-full w-full",
         isDraggedOver ? "border-blue-500" : "border-white"
       )}
     >

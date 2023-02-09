@@ -37,7 +37,7 @@ export default function DebugView() {
                   entity.retract("isHovered")
                 }}
                 className={classNames(
-                  "p-1 rounded border",
+                  "p-1 rounded-xl border",
                   entity.data.isHovered ? "border-blue-500" : "border-transparent"
                 )}
               >

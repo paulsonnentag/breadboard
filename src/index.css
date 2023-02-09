@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --bg-color: #f3f4f6;
+  --bg-color: #e1e1e1;
   --dot-color: #9b9b9b;
   --dot-size: 1px;
   --dot-space: 25px;

@@ -27,7 +27,7 @@ function NamedEntityView({
 >) {
   return (
     <div
-      className={classNames("flex gap-2 rounded p-1", {
+      className={classNames("flex gap-2 rounded-xl p-1", {
         "bg-gray-100": entity.data.isHovered,
       })}
       onMouseEnter={() => entity.replace("isHovered", true)}

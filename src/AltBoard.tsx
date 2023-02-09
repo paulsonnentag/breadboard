@@ -4,6 +4,7 @@ import { useDocument } from "automerge-repo-react-hooks"
 import React, { useRef, useState } from "react"
 import classNames from "classnames"
 import { uuid } from "@automerge/automerge"
+import moment from "moment"
 
 export interface MoveWidgetDragData {
   type: "move"
@@ -35,13 +36,18 @@ const INITIAL_WIDGETS: BoardWidget[] = [
     },
   },
   {
-    x: 700,
+    x: 800,
     y: 100,
-    width: 300,
+    width: 400,
     height: 300,
     widget: {
       id: uuid(),
       type: "weather",
+      calendarWidget: {
+        id: uuid(),
+        type: "calendar",
+        date: moment().unix() * 1000,
+      },
     },
   },
 
@@ -220,7 +226,7 @@ function BoardWidgetView({
         height: height,
       }}
     >
-      <div className="rounded bg-white shadow w-full h-full flex flex-col">
+      <div className="rounded-xl bg-white shadow w-full h-full flex flex-col">
         <WidgetView
           widget={widget}
           widgetsInScope={boardWidgets.map(({ widget }) => widget)}

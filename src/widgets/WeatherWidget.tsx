@@ -2,16 +2,19 @@ import { getLocationWidgets, Widget } from "./index"
 import { LocationStackView } from "./LocationWidget"
 import { useEffect, useState } from "react"
 import moment, { Moment } from "moment"
+import { CalendarPickerView, CalendarWidget } from "./CalendarWidget"
 
 export interface WeatherWidget {
   id: string
   type: "weather"
   selectedLocationId: string
+  calendarWidget: CalendarWidget
 }
 
 interface WeatherWidgetViewProps {
   widget: WeatherWidget
   onChange: (fn: (widget: WeatherWidget) => void) => void
+  widgetsInScope: Widget[]
 }
 
 interface Prediction {
@@ -23,15 +26,13 @@ interface Prediction {
 export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherWidgetViewProps) {
   const locationWidgets = getLocationWidgets(widgetsInScope)
 
-  const selectedLocation = locationWidgets.find(
-    (location) => location.id === widget.selectedLocationId
-  )
+  const selectedLocation =
+    locationWidgets.find((location) => location.id === widget.selectedLocationId) ??
+    locationWidgets[0]
 
   const [weatherData, setWeatherData] = useState<any>()
 
-  console.log(weatherData)
-
-  const day = moment().startOf("day")
+  const day = moment(widget.calendarWidget.date).startOf("day")
   const currentHour = moment().startOf("hour")
 
   const predictions: Prediction[] = weatherData
@@ -43,8 +44,12 @@ export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherW
             temperature: weatherData.hourly.temperature_2m[index],
           }
         })
-        .filter(({ timestamp }: Prediction) => timestamp.clone().startOf("day").isSame(day))
+        .filter(({ timestamp }: Prediction) =>
+          timestamp.clone().subtract({ minute: 1 }).startOf("day").isSame(day)
+        )
     : []
+
+  console.log(selectedLocation, day.toString(), predictions)
 
   const currentPrediction = predictions.find(({ timestamp }) => timestamp.isSame(currentHour))
 
@@ -68,17 +73,24 @@ export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherW
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-yellow-600 p-2">Weather</div>
 
-        <LocationStackView
-          widgets={locationWidgets}
-          selectedWidgetId={widget.selectedLocationId}
-          onSelectWidgetId={(widgetId) => {
-            onChange((widget) => (widget.selectedLocationId = widgetId))
-          }}
-        />
+        <div className="flex gap-1">
+          <CalendarPickerView
+            widget={widget.calendarWidget}
+            onChange={(fn) => onChange((widget) => fn(widget.calendarWidget))}
+          />
+
+          <LocationStackView
+            widgets={locationWidgets}
+            selectedWidgetId={widget.selectedLocationId}
+            onSelectWidgetId={(widgetId) => {
+              onChange((widget) => (widget.selectedLocationId = widgetId))
+            }}
+          />
+        </div>
       </div>
 
       {currentPrediction && (
-        <div className="flex justify-between p-2 border-b border-gray-300">
+        <div className="flex justify-between p-2 border-b border-gray-300 bg-gray-100">
           <div className="font-bold">now</div>
           <div>
             {currentPrediction.temperature} ° {currentPrediction.description}
@@ -86,16 +98,21 @@ export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherW
         </div>
       )}
 
-      <div className="flex-1 overflow-auto p-2" style={{ minHeight: 0 }}>
-        {predictions &&
-          predictions.map((prediction) => (
-            <div className="flex justify-between">
-              <div className="">{prediction.timestamp.format("h a")}</div>
-              <div>
-                {prediction.temperature} ° {prediction.description}
-              </div>
+      <div className="flex-1 overflow-auto p-2 bg-gray-100 rounded-b-xl" style={{ minHeight: 0 }}>
+        {predictions.map((prediction, index) => (
+          <div className="flex justify-between" key={index}>
+            <div className="">{prediction.timestamp.format("h a")}</div>
+            <div>
+              {prediction.temperature} ° {prediction.description}
             </div>
-          ))}
+          </div>
+        ))}
+
+        {predictions.length == 0 && (
+          <div className="flex items-center justify-center w-full h-full text-gray-500">
+            no data available
+          </div>
+        )}
       </div>
     </div>
   )
