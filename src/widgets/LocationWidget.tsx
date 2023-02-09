@@ -1,10 +1,11 @@
 import LatLngLiteral = google.maps.LatLngLiteral
+import AutocompletePrediction = google.maps.places.AutocompletePrediction
 import { useOnClickOutside } from "../hooks"
 import { useEffect, useMemo, useRef, useState } from "react"
-import AutocompletePrediction = google.maps.places.AutocompletePrediction
-import { ArrowUpIcon, ResetIcon } from "@radix-ui/react-icons"
+import { ArrowUpIcon, ChevronLeftIcon, ChevronRightIcon, ResetIcon } from "@radix-ui/react-icons"
 
 export interface LocationWidget {
+  id: string
   type: "location"
   name: string
   latLng: LatLngLiteral
@@ -15,7 +16,7 @@ interface LocationWidgetViewProps {
   onChange: (fn: (widget: LocationWidget) => void) => void
 }
 
-export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps) {
+export function LocationWidgetView({ widget, onChange }: LocationPickerViewProps) {
   const [search, setSearch] = useState("")
   const [predictions, setPredictions] = useState<AutocompletePrediction[]>([])
   const autocomplete = useMemo(() => new google.maps.places.AutocompleteService(), [])
@@ -57,8 +58,6 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
     // onChange((widget) => widget.name = )
   }
 
-  console.log(predictions)
-
   return (
     <div className="p-2 flex flex-col gap-1 h-full">
       <input
@@ -90,19 +89,19 @@ export interface LocationOverride {
   name: string
 }
 
-interface LocationWidgetViewProps {
+interface LocationPickerViewProps {
   widget: LocationWidget
   override?: LocationOverride
   onChange: (fn: (widget: LocationWidget) => void) => void
   onResetOverride?: () => void
 }
 
-export function LocationContextView({
+export function LocationPickerView({
   widget,
   override,
   onChange,
   onResetOverride,
-}: LocationWidgetViewProps) {
+}: LocationPickerViewProps) {
   const ref = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -117,8 +116,6 @@ export function LocationContextView({
             <div
               className="bg-purple-600 text-white p-2 flex gap-1"
               onClick={(evt) => {
-                console.log("promote")
-
                 onChange((widget) => {
                   widget.name = override?.name
                   widget.latLng = override?.latLng
@@ -161,4 +158,57 @@ export function LocationContextView({
       )}
     </div>
   )
+}
+
+interface LocationStackViewProps {
+  widgets: LocationWidget[]
+  selectedWidgetId: string
+  onSelectWidgetId: (id: string) => void
+}
+
+export function LocationStackView({
+  widgets,
+  selectedWidgetId,
+  onSelectWidgetId,
+}: LocationStackViewProps) {
+  if (widgets.length === 0) {
+    return null
+  }
+
+  let selectedWidgetIndex = widgets.findIndex(({ id }) => id == selectedWidgetId)
+  if (selectedWidgetIndex === -1) {
+    selectedWidgetIndex = 0
+  }
+
+  const selectedWidget = widgets[selectedWidgetIndex]
+  const prevWidget = widgets[positiveMod(selectedWidgetIndex - 1, widgets.length)]
+  const nextWidget = widgets[positiveMod(selectedWidgetIndex + 1, widgets.length)]
+
+  console.log("prev", (selectedWidgetIndex - 1) % widgets.length)
+
+  return (
+    <div className="bg-gray-200 rounded-md p-2 text-purple-700 flex text-xs items-middle">
+      <button
+        onClick={() => {
+          onSelectWidgetId(prevWidget.id)
+        }}
+      >
+        <ChevronLeftIcon />
+      </button>
+
+      <div>{selectedWidget.name}</div>
+
+      <button
+        onClick={() => {
+          onSelectWidgetId(nextWidget.id)
+        }}
+      >
+        <ChevronRightIcon />
+      </button>
+    </div>
+  )
+}
+
+function positiveMod(x: number, n: number) {
+  return ((x % n) + n) % n
 }

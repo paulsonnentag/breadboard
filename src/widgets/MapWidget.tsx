@@ -5,7 +5,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react"
 import LatLng = google.maps.LatLng
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 import {
-  LocationContextView,
+  LocationPickerView,
   LocationOverride,
   LocationWidget,
   LocationWidgetView,
@@ -15,6 +15,7 @@ import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 
 export interface MapWidget {
+  id: string
   type: "map"
   locationWidget: LocationWidget
 }
@@ -167,7 +168,7 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
       <div className="flex p-2 items-center justify-between">
         <div className="text-green-600 p-2">Map</div>
 
-        <LocationContextView
+        <LocationPickerView
           override={currentOverride}
           onResetOverride={() => {
             setCurrentOverride(undefined)

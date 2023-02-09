@@ -3,6 +3,7 @@ import { Widget, WidgetView } from "./widgets"
 import { useDocument } from "automerge-repo-react-hooks"
 import React, { useRef, useState } from "react"
 import classNames from "classnames"
+import { uuid } from "@automerge/automerge"
 
 export interface MoveWidgetDragData {
   type: "move"
@@ -20,8 +21,10 @@ const INITIAL_WIDGETS: BoardWidget[] = [
     width: 600,
     height: 600,
     widget: {
+      id: uuid(),
       type: "map",
       locationWidget: {
+        id: uuid(),
         type: "location",
         name: "current location",
         latLng: {
@@ -32,12 +35,29 @@ const INITIAL_WIDGETS: BoardWidget[] = [
     },
   },
   {
-    x: 400,
+    x: 700,
     y: 100,
     width: 300,
     height: 300,
     widget: {
+      id: uuid(),
       type: "weather",
+    },
+  },
+
+  {
+    x: 100,
+    y: 700,
+    width: 300,
+    height: 300,
+    widget: {
+      id: uuid(),
+      type: "location",
+      name: "current location",
+      latLng: {
+        lat: 50.775555,
+        lng: 6.083611,
+      },
     },
   },
 ]
