@@ -1,4 +1,4 @@
-import { Widget } from "./index"
+import { getWidgetsOnMap, Widget } from "./index"
 import LatLngLiteral = google.maps.LatLngLiteral
 import Map = google.maps.Map
 import { useEffect, useId, useMemo, useRef, useState } from "react"
@@ -13,6 +13,7 @@ import {
 import debounce from "lodash.debounce"
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
+import MapsEventListener = google.maps.MapsEventListener
 
 export interface MapWidget {
   id: string
@@ -29,10 +30,14 @@ interface MapWidgetViewProps {
 export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetViewProps) {
   const mapId = useId()
   const mapRef = useRef<Map>()
+  const listenersRef = useRef<MapsEventListener[]>([])
   const markersRef = useRef<AdvancedMarkerView[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const [currentOverride, setCurrentOverride] = useState<LocationOverride>()
   const geoCoder = useMemo(() => new google.maps.Geocoder(), [])
+  const widgetsOnMap = getWidgetsOnMap(widgetsInScope)
+
+  // init map
 
   useEffect(() => {
     const currentContainer = containerRef.current
@@ -94,23 +99,15 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
     }
   }, [containerRef.current])
 
-  useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.setCenter(widget.locationWidget.latLng)
-    }
-  }, [widget.locationWidget.latLng])
-
-  /*
+  // update markers
 
   useEffect(() => {
     if (!mapRef.current) {
       return
     }
 
-    const geoMarkers = entity.data.geoMarkers
-
-    const markersToDelete = markersRef.current.slice(geoMarkers.length)
-    const prevMarkers = (markersRef.current = markersRef.current.slice(0, geoMarkers.length))
+    const markersToDelete = markersRef.current.slice(widgetsOnMap.length)
+    const prevMarkers = (markersRef.current = markersRef.current.slice(0, widgetsOnMap.length))
 
     listenersRef.current.forEach((listener) => {
       listener.remove()
@@ -121,8 +118,8 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
       marker.map = null
     })
 
-    for (let i = 0; i < geoMarkers.length; i++) {
-      const geoMarker = geoMarkers[i]
+    for (let i = 0; i < widgetsOnMap.length; i++) {
+      const geoMarker = widgetsOnMap[i]
       let mapsMarker = prevMarkers[i] // reuse existing markers, if it already exists
 
       if (!mapsMarker) {
@@ -131,7 +128,7 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
         mapsMarker = new AdvancedMarkerView({
           map: mapRef.current,
           content: element,
-          position: new LatLng(geoMarker.value),
+          position: new LatLng(geoMarker.latLng),
         })
 
         prevMarkers.push(mapsMarker)
@@ -139,6 +136,9 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
 
       const markerContent = mapsMarker.content as HTMLDivElement
 
+      markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer bg-red-500`
+
+      /*
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
         geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
       }`
@@ -151,13 +151,13 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
         geoMarker.entity.retract("isHovered")
       }
 
+       */
 
+      mapsMarker.position = new LatLng(geoMarker.latLng)
 
-      mapsMarker.position = new LatLng(geoMarker.value)
-      mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
+      // mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
     }
-  }, [entity.data.geoMarkers, mapRef.current])
-  */
+  }, [widgetsOnMap, mapRef.current])
 
   const contextWidgets = widget.locationWidget
     ? widgetsInScope

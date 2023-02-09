@@ -37,6 +37,16 @@ const INITIAL_WIDGETS: BoardWidget[] = [
   },
   {
     x: 800,
+    y: 800,
+    width: 400,
+    height: 600,
+    widget: {
+      id: uuid(),
+      type: "poiFinder",
+    },
+  },
+  {
+    x: 800,
     y: 100,
     width: 400,
     height: 300,
@@ -47,22 +57,6 @@ const INITIAL_WIDGETS: BoardWidget[] = [
         id: uuid(),
         type: "calendar",
         date: moment().unix() * 1000,
-      },
-    },
-  },
-
-  {
-    x: 100,
-    y: 700,
-    width: 300,
-    height: 300,
-    widget: {
-      id: uuid(),
-      type: "location",
-      name: "current location",
-      latLng: {
-        lat: 50.775555,
-        lng: 6.083611,
       },
     },
   },
@@ -211,6 +205,10 @@ function BoardWidgetView({
     setTimeout(() => setIsDragged(false))
   }
 
+  const widgetsInScope = boardWidgets
+    .map(({ widget }) => widget)
+    .filter((otherWidget) => otherWidget.id !== widget.id)
+
   return (
     <div
       ref={ref}
@@ -227,11 +225,7 @@ function BoardWidgetView({
       }}
     >
       <div className="rounded-xl bg-white shadow w-full h-full flex flex-col">
-        <WidgetView
-          widget={widget}
-          widgetsInScope={boardWidgets.map(({ widget }) => widget)}
-          onChange={onChange}
-        />
+        <WidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
       </div>
     </div>
   )

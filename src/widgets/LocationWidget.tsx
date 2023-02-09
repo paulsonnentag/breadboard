@@ -55,30 +55,35 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
         })
       }
     })
-    // onChange((widget) => widget.name = )
   }
 
   return (
-    <div className="p-2 flex flex-col gap-1 h-full">
-      <input
-        className="text-base"
-        value={search}
-        onChange={(evt) => setSearch(evt.target.value)}
-        placeholder="Search ..."
-      />
+    <div className="flex flex-col h-full">
+      <div className="flex p-2 items-center justify-between border-b border-gray-300">
+        <div className="text-purple-600 p-2">Location</div>
+      </div>
 
-      {!search && <div className="bg-purple-600 rounded-xl text-white p-2">{widget.name}</div>}
+      <div className="p-2 flex flex-col gap-2 flex-1 bg-gray-100 rounded-b-xl">
+        <input
+          className="text-base bg-gray-100"
+          value={search}
+          onChange={(evt) => setSearch(evt.target.value)}
+          placeholder="Search ..."
+        />
 
-      <div className="flex flex-col gap-1 flex-1 overflow-auto" style={{ minHeight: 0 }}>
-        {predictions.map((prediction, index) => (
-          <div
-            key={index}
-            className="bg-gray-200 rounded-xl p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
-            onClick={() => onSelectPlace(prediction.place_id)}
-          >
-            {prediction.description}
-          </div>
-        ))}
+        {!search && <div className="bg-purple-600 rounded-xl text-white p-2">{widget.name}</div>}
+
+        <div className="flex flex-col gap-1 flex-1 overflow-auto" style={{ minHeight: 0 }}>
+          {predictions.map((prediction, index) => (
+            <div
+              key={index}
+              className="bg-gray-200 rounded-xl p-2 whitespace-nowrap overflow-hidden overflow-ellipsis"
+              onClick={() => onSelectPlace(prediction.place_id)}
+            >
+              {prediction.description}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

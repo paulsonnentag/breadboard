@@ -1,8 +1,17 @@
 import { MapWidgetView, MapWidget } from "./MapWidget"
 import { WeatherWidgetView, WeatherWidget } from "./WeatherWidget"
 import { LocationWidgetView, LocationWidget } from "./LocationWidget"
+import { PoiFinderWidget, PoiFinderWidgetView, PoiResultWidget } from "./PoiFinderWidget"
+import { CalendarWidget } from "./CalendarWidget"
+import LatLngLiteral = google.maps.LatLngLiteral
 
-export type Widget = MapWidget | WeatherWidget | LocationWidget
+export type Widget =
+  | MapWidget
+  | WeatherWidget
+  | LocationWidget
+  | PoiFinderWidget
+  | CalendarWidget
+  | PoiResultWidget
 
 interface WidgetViewProps {
   widget: Widget
@@ -22,6 +31,14 @@ export function WidgetView({ widget, onChange, widgetsInScope }: WidgetViewProps
 
     case "location":
       return <LocationWidgetView widget={widget} onChange={onChange} />
+
+    case "poiFinder":
+      return (
+        <PoiFinderWidgetView widget={widget} onChange={onChange} widgetsInScope={widgetsInScope} />
+      )
+
+    default:
+      return `not implemented "${widget.type}"`
   }
 }
 
@@ -36,6 +53,36 @@ function getLocationsOfWidget(widget: Widget): LocationWidget[] {
 
     case "location":
       return [widget]
+
+    default:
+      return []
+  }
+}
+
+interface WidgetOnMap {
+  widget: Widget
+  latLng: LatLngLiteral
+}
+
+export function getWidgetsOnMap(widgets: Widget[]): WidgetOnMap[] {
+  return widgets.flatMap(getWidgetsOnMapOfWidget)
+}
+
+function getWidgetsOnMapOfWidget(widget: Widget): WidgetOnMap[] {
+  switch (widget.type) {
+    case "poiFinder":
+      if (!widget.results) {
+        return []
+      }
+      return widget.results.pois.flatMap(getWidgetsOnMapOfWidget)
+
+    case "poiResult":
+      return [
+        {
+          widget,
+          latLng: widget.latLng,
+        },
+      ]
 
     default:
       return []

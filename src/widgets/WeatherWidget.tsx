@@ -49,8 +49,6 @@ export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherW
         )
     : []
 
-  console.log(selectedLocation, day.toString(), predictions)
-
   const currentPrediction = predictions.find(({ timestamp }) => timestamp.isSame(currentHour))
 
   useEffect(() => {
