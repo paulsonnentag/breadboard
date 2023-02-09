@@ -126,13 +126,12 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
       </div>
 
       {widget.results && (
-        <div
-          className="bg-gray-100 flex-1 p-2 rounded-b-xl flex flex-col gap-2"
-          style={{ minHeight: 0 }}
-        >
-          {widget.results.pois.map((poiWidget, index) => (
-            <PoiResultWidgetListItemView widget={poiWidget} key={index} />
-          ))}
+        <div className="bg-gray-100 flex-1 p-2 rounded-b-xl overflow-auto" style={{ minHeight: 0 }}>
+          <div className=" flex flex-col gap-2">
+            {widget.results.pois.map((poiWidget, index) => (
+              <PoiResultWidgetListItemView widget={poiWidget} key={index} />
+            ))}
+          </div>
         </div>
       )}
     </div>

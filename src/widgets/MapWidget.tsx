@@ -159,6 +159,16 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
     }
   }, [widgetsOnMap, mapRef.current])
 
+  useEffect(() => {
+    if (
+      mapRef.current &&
+      !currentOverride &&
+      !mapRef.current?.getCenter()?.equals(new LatLng(widget.locationWidget.latLng))
+    ) {
+      mapRef.current.setCenter(widget.locationWidget.latLng)
+    }
+  }, [widget.locationWidget.latLng, currentOverride])
+
   const contextWidgets = widget.locationWidget
     ? widgetsInScope
     : widgetsInScope.concat(widget.locationWidget)

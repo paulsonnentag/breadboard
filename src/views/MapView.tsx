@@ -144,6 +144,12 @@ function MapView({ entity }: EntityViewProps<MapEntityProps & GeoMarkersComputat
     }
   }, [entity.data.geoMarkers, mapRef.current])
 
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setCenter(widget.locationWidget.latLng)
+    }
+  }, [widget.locationWidget.latLng])
+
   return (
     <div
       className="w-full h-full"
