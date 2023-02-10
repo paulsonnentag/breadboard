@@ -13,9 +13,18 @@ export interface MoveWidgetDragData {
   index: number
 }
 
-type DragData = MoveWidgetDragData
+export interface CreateWidgetDragData {
+  type: "create"
+  offsetX: number
+  offsetY: number
+  width: number
+  height: number
+  widget: Widget
+}
 
-const INITIAL_WIDGETS: BoardWidget[] = [
+type DragData = MoveWidgetDragData | CreateWidgetDragData
+
+const INITIAL_WIDGETS: WidgetOnBoard[] = [
   {
     x: 100,
     y: 100,
@@ -73,10 +82,10 @@ export function createBoardDoc(repo: Repo) {
 }
 
 interface BoardDoc {
-  widgets: BoardWidget[]
+  widgets: WidgetOnBoard[]
 }
 
-interface BoardWidget {
+interface WidgetOnBoard {
   widget: Widget
   x: number
   y: number
@@ -106,21 +115,30 @@ export function BoardView({ docId }: BoardViewDoc) {
   const onDrop = (evt: React.DragEvent) => {
     const dragData = JSON.parse(evt.dataTransfer.getData("application/drag-data")) as DragData
 
+    const x = evt.pageX - dragData.offsetX
+    const y = evt.pageY - dragData.offsetY
+
     changeDoc((doc) => {
-      let widget: BoardWidget | undefined
-
       switch (dragData.type) {
-        case "move":
-          widget = doc.widgets[dragData.index]
+        case "create":
+          const widgetOnBoard = {
+            x: x,
+            y: y,
+            width: dragData.width,
+            height: dragData.height,
+            widget: dragData.widget,
+          }
+
+          doc.widgets.push(widgetOnBoard)
           break
-      }
 
-      if (!widget) {
-        return
+        case "move": {
+          const widgetOnBoard = doc.widgets[dragData.index]
+          widgetOnBoard.x = x
+          widgetOnBoard.y = y
+          break
+        }
       }
-
-      widget.x = evt.pageX - dragData.offsetX
-      widget.y = evt.pageY - dragData.offsetY
     })
   }
 
@@ -163,7 +181,7 @@ interface BoardWidgetView {
   width: number
   height: number
   widget: Widget
-  boardWidgets: BoardWidget[]
+  boardWidgets: WidgetOnBoard[]
   onChange: (fn: (widget: Widget) => void) => void
 }
 

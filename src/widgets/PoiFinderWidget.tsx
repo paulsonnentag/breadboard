@@ -1,15 +1,16 @@
 import { getLocationWidgets, Widget } from "./index"
 import { LocationStackView } from "./LocationWidget"
-import { useEffect, useMemo, useState } from "react"
+import { DragEventHandler, useEffect, useMemo, useRef, useState } from "react"
 import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import PlaceResult = google.maps.places.PlaceResult
 import { uuid } from "@automerge/automerge"
+import { CreateWidgetDragData } from "../AltBoard"
 
 export interface PoiFinderWidget {
   id: string
   type: "poiFinder"
-  selectedLocationId: string
+  selectedLocationId?: string
   results?: PoiResults
 }
 
@@ -25,7 +26,6 @@ interface PoiFinderViewProps {
 }
 
 export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFinderViewProps) {
-  const [search, setSearch] = useState("")
   const locationWidgets = getLocationWidgets(widgetsInScope)
 
   const selectedLocation =
@@ -52,9 +52,47 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
         radius: 50000,
         type: "campground",
       },
-      (results) => {
-        if (results) {
-          const pois: PoiResultWidget[] = results.flatMap((result: PlaceResult) => {
+      async (results) => {
+        if (!results) {
+          return
+        }
+
+        const detailedResults = await Promise.all<PlaceResult | null>(
+          results.map((result) => {
+            const placeId = result.place_id
+
+            if (!placeId) {
+              return null
+            }
+
+            return new Promise((resolve) => {
+              placesService.getDetails(
+                {
+                  placeId: placeId,
+                  fields: [
+                    "name",
+                    "rating",
+                    "photos",
+                    "website",
+                    "formatted_phone_number",
+                    "formatted_address",
+                    "geometry",
+                  ],
+                },
+                (result) => {
+                  resolve(result)
+                }
+              )
+            })
+          })
+        )
+
+        const pois: PoiResultWidget[] = detailedResults.flatMap(
+          (detailedResult: PlaceResult | null) => {
+            if (!detailedResult) {
+              return []
+            }
+
             const {
               name,
               rating,
@@ -63,11 +101,13 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
               formatted_phone_number,
               formatted_address,
               geometry,
-            } = result
+            } = detailedResult
 
             if (!name || !geometry?.location) {
               return []
             }
+
+            console.log(detailedResult, formatted_address)
 
             const poi: PoiResultWidget = {
               id: uuid(),
@@ -94,17 +134,17 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
             }
 
             return [poi]
-          })
+          }
+        )
 
-          console.log("fetch pois")
+        console.log("fetch pois")
 
-          onChange((widget) => {
-            widget.results = {
-              latLng: new LatLng(selectedLocation.latLng).toJSON(), // convert to latlng first to remove automerge references
-              pois,
-            }
-          })
-        }
+        onChange((widget) => {
+          widget.results = {
+            latLng: new LatLng(selectedLocation.latLng).toJSON(), // convert to latlng first to remove automerge references
+            pois,
+          }
+        })
       }
     )
   }, [selectedLocation.latLng.lat, selectedLocation.latLng.lng])
@@ -155,9 +195,63 @@ interface PoiResultWidgetListItemViewProps {
 }
 
 function PoiResultWidgetListItemView({ widget }: PoiResultWidgetListItemViewProps) {
+  const onDragStart: DragEventHandler<HTMLDivElement> = (evt) => {
+    var bounds = (evt.target as HTMLDivElement).getBoundingClientRect()
+
+    evt.dataTransfer.setData(
+      "application/drag-data",
+      JSON.stringify({
+        type: "create",
+        widget,
+        width: 400,
+        height: 400,
+        offsetX: evt.clientX - bounds.left,
+        offsetY: evt.clientY - bounds.top,
+      } as CreateWidgetDragData)
+    )
+
+    evt.stopPropagation()
+  }
+
   return (
-    <div className="bg-gray-200 rounded-xl p-2 whitespace-nowrap overflow-hidden overflow-ellipsis flex justify-between">
+    <div
+      className="bg-gray-200 rounded-xl p-2 whitespace-nowrap overflow-hidden overflow-ellipsis flex justify-between"
+      draggable
+      onDragStart={onDragStart}
+    >
       {widget.name} {widget.rating}
+    </div>
+  )
+}
+
+interface PoiResultWidgetViewProps {
+  widget: PoiResultWidget
+  widgetsInScope: Widget[]
+}
+
+export function PoiResultWidgetView({ widget, widgetsInScope }: PoiResultWidgetViewProps) {
+  return (
+    <div className="flex flex-col w-full h-full">
+      <div className="flex p-2 items-center justify-between border-b border-gray-300">
+        <div className="text-green-600 p-2">Place</div>
+        <div className="flex gap-1"></div>
+      </div>
+      <div
+        className="flex-1 overflow-auto p-4 bg-gray-100 rounded-b-xl flex flex-col gap-1"
+        style={{ minHeight: 0 }}
+      >
+        <h1 className="font-bold text-xl">{widget.name}</h1>
+
+        {widget.address && <p>{widget.address}</p>}
+        {widget.website && <a href={widget.website}>{widget.website}</a>}
+        {widget.phoneNumber && <a href={`tel:${widget.phoneNumber}`}>{widget.phoneNumber}</a>}
+
+        <div className="h-[150px] flex gap-1 w-full overflow-auto">
+          {widget.photos.map((photo) => (
+            <img src={photo} className="h-full" />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

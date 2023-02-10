@@ -1,7 +1,12 @@
 import { MapWidgetView, MapWidget } from "./MapWidget"
 import { WeatherWidgetView, WeatherWidget } from "./WeatherWidget"
 import { LocationWidgetView, LocationWidget } from "./LocationWidget"
-import { PoiFinderWidget, PoiFinderWidgetView, PoiResultWidget } from "./PoiFinderWidget"
+import {
+  PoiFinderWidget,
+  PoiFinderWidgetView,
+  PoiResultWidget,
+  PoiResultWidgetView,
+} from "./PoiFinderWidget"
 import { CalendarWidget } from "./CalendarWidget"
 import LatLngLiteral = google.maps.LatLngLiteral
 
@@ -37,8 +42,11 @@ export function WidgetView({ widget, onChange, widgetsInScope }: WidgetViewProps
         <PoiFinderWidgetView widget={widget} onChange={onChange} widgetsInScope={widgetsInScope} />
       )
 
+    case "poiResult":
+      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} />
+
     default:
-      return `not implemented "${widget.type}"`
+      return <span>not implemented {widget.type}</span>
   }
 }
 
