@@ -7,6 +7,7 @@ import { uuid } from "@automerge/automerge"
 import moment from "moment"
 import { WeatherWidget } from "./widgets/WeatherWidget"
 import { Cross2Icon } from "@radix-ui/react-icons"
+import WidgetBar from "./WidgetBar"
 
 export interface MoveWidgetDragData {
   type: "move"
@@ -26,58 +27,11 @@ export interface CreateWidgetDragData {
 
 type DragData = MoveWidgetDragData | CreateWidgetDragData
 
-const INITIAL_WIDGETS: WidgetOnBoard[] = [
-  {
-    x: 100,
-    y: 100,
-    width: 600,
-    height: 600,
-    widget: {
-      id: uuid(),
-      type: "map",
-      locationWidget: {
-        id: uuid(),
-        type: "location",
-        name: "current location",
-        latLng: {
-          lat: 50.775555,
-          lng: 6.083611,
-        },
-      },
-    },
-  },
-  {
-    x: 800,
-    y: 800,
-    width: 400,
-    height: 600,
-    widget: {
-      id: uuid(),
-      type: "poiFinder",
-    },
-  },
-  {
-    x: 800,
-    y: 100,
-    width: 400,
-    height: 300,
-    widget: {
-      id: uuid(),
-      type: "weather",
-      calendarWidget: {
-        id: uuid(),
-        type: "calendar",
-        date: moment().unix() * 1000,
-      },
-    } as WeatherWidget,
-  },
-]
-
 export function createBoardDoc(repo: Repo) {
   const handle = repo.create<BoardDoc>()
 
   handle.change((doc) => {
-    doc.widgets = INITIAL_WIDGETS
+    doc.widgets = []
   })
 
   return handle
@@ -175,6 +129,8 @@ export function BoardView({ docId }: BoardViewDoc) {
           }}
         />
       ))}
+
+      <WidgetBar />
     </div>
   )
 }

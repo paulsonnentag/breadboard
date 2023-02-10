@@ -2,69 +2,74 @@ import { EntityData } from "./db"
 import React, { useRef } from "react"
 import { DragHandleDots2Icon } from "@radix-ui/react-icons"
 import colors from "tailwindcss/colors"
-import { MapEntityProps } from "./views/MapView"
-import { CreateWidgetDragData, WidgetEntityProps } from "./Board"
-import { PoiFinderEntityProps } from "./views/PoiFinderView"
-import { ListEntityProps } from "./views/ListView"
-import { WeatherEntityProps } from "./views/WeatherView"
-import { CalendarEntityProps } from "./views/CalendarView"
+import { CreateWidgetDragData } from "./Board"
+import { uuid } from "@automerge/automerge"
+import moment from "moment/moment"
+import { WeatherWidget } from "./widgets/WeatherWidget"
+import { Widget } from "./widgets"
 
-const MAP: MapEntityProps & Partial<WidgetEntityProps> = {
-  width: 300,
-  height: 300,
-  center: {
-    lng: -87.623177,
-    lat: 41.881832,
+interface WidgetItem {
+  width: number
+  height: number
+  widget: Widget
+}
+
+const MAP: WidgetItem = {
+  width: 600,
+  height: 600,
+  widget: {
+    id: uuid(),
+    type: "map",
+    locationWidget: {
+      id: uuid(),
+      type: "location",
+      name: "current location",
+      latLng: {
+        lat: 50.775555,
+        lng: 6.083611,
+      },
+    },
   },
 }
 
-const POI_FINDER: PoiFinderEntityProps & Partial<WidgetEntityProps> = {
-  type: "poiFinder",
-  placeType: "campground",
-  width: 300,
-  height: 300,
-  items: [],
-}
-
-const EMPTY: Partial<WidgetEntityProps> = {
-  width: 300,
-  height: 300,
-}
-
-const EMPTY_LIST: Partial<WidgetEntityProps> & ListEntityProps = {
-  items: [],
-  width: 300,
-  height: 300,
-}
-
-const WEATHER: Partial<WidgetEntityProps> & WeatherEntityProps = {
-  type: "weather",
+const POI_FINDER: WidgetItem = {
   width: 400,
-  height: 200,
+  height: 600,
+  widget: {
+    id: uuid(),
+    type: "poiFinder",
+  },
 }
 
-const CALENDAR: Partial<WidgetEntityProps> & CalendarEntityProps = {
-  type: "calendar",
-  width: 800,
-  height: 600,
+const WEATHER: WidgetItem = {
+  width: 400,
+  height: 300,
+  widget: {
+    id: uuid(),
+    type: "weather",
+    calendarWidget: {
+      id: uuid(),
+      type: "calendar",
+      date: moment().unix() * 1000,
+    },
+  } as WeatherWidget,
 }
 
 export default function WidgetBar() {
   return (
     <div className="flex gap-1 fixed top-3 left-3">
       <WidgetItem label="Map" data={MAP} />
-      <WidgetItem label="POI finder" data={POI_FINDER} />
-      <WidgetItem label="Empty" data={EMPTY} />
-      <WidgetItem label="Empty List" data={EMPTY_LIST} />
+      <WidgetItem label="Campground finder" data={POI_FINDER} />
       <WidgetItem label="Weather" data={WEATHER} />
-      <WidgetItem label="Calendar" data={CALENDAR} />
     </div>
   )
 }
 
 interface WidgetItemProps {
   label: string
-  data: EntityData
+  data: WidgetItem
+  width: number
+  height: number
 }
 function WidgetItem({ label, data }: WidgetItemProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -80,7 +85,9 @@ function WidgetItem({ label, data }: WidgetItemProps) {
       "application/drag-data",
       JSON.stringify({
         type: "create",
-        entityData: data,
+        widget: data.widget,
+        height: data.height,
+        width: data.width,
         offsetX: evt.clientX - bounds.left,
         offsetY: evt.clientY - bounds.top,
       } as CreateWidgetDragData)
