@@ -9,6 +9,7 @@ import {
 } from "./PoiFinderWidget"
 import { CalendarWidget } from "./CalendarWidget"
 import LatLngLiteral = google.maps.LatLngLiteral
+import { uniqBy } from "lodash"
 
 export type Widget =
   | MapWidget
@@ -51,7 +52,8 @@ export function WidgetView({ widget, onChange, widgetsInScope }: WidgetViewProps
 }
 
 export function getLocationWidgets(widgets: Widget[]) {
-  return widgets.flatMap(getLocationsOfWidget)
+  // hack filter uniqueness to eliminate duplicates, for example when poiresult is multiple times on board
+  return uniqBy(widgets.flatMap(getLocationsOfWidget), (w: Widget) => w.id)
 }
 
 function getLocationsOfWidget(widget: Widget): LocationWidget[] {
@@ -61,6 +63,19 @@ function getLocationsOfWidget(widget: Widget): LocationWidget[] {
 
     case "location":
       return [widget]
+
+    case "poiFinder":
+      return widget.results ? widget.results.pois.flatMap(getLocationsOfWidget) : []
+
+    case "poiResult":
+      return [
+        {
+          id: widget.id,
+          type: "location",
+          name: widget.name,
+          latLng: widget.latLng,
+        },
+      ]
 
     default:
       return []

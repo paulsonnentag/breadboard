@@ -10,7 +10,7 @@ import {
   LocationWidget,
   LocationWidgetView,
 } from "./LocationWidget"
-import debounce from "lodash.debounce"
+import { debounce } from "lodash"
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 import MapsEventListener = google.maps.MapsEventListener

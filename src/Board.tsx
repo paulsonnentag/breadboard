@@ -250,7 +250,7 @@ function BoardWidgetView({
       }}
     >
       <div className="rounded-xl bg-white shadow w-full h-full flex flex-col relative">
-        <button className="absolute left-full ml-1 text-xl" onClick={() => onDelete()}>
+        <button className="absolute left-full ml-1" onClick={() => onDelete()}>
           <Cross2Icon />
         </button>
         <WidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />

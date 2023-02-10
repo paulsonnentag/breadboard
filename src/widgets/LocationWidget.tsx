@@ -107,7 +107,7 @@ export function LocationPickerView({
   onChange,
   onResetOverride,
 }: LocationPickerViewProps) {
-  const ref = useRef<HTMLElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useOnClickOutside(ref, () => setIsOpen(false))
