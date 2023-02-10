@@ -1,40 +1,109 @@
-import {
-  EntityData,
-  EntityMap,
-  EntityRef,
-  UnknownEntityRef,
-  useCreateEntity,
-  useEntities,
-  useFacts,
-} from "./db"
-import React, { createElement, useRef, useState } from "react"
+import { DocumentId, Repo } from "automerge-repo"
+import { Widget, WidgetView } from "./widgets"
+import { useDocument } from "automerge-repo-react-hooks"
+import React, { useRef, useState } from "react"
 import classNames from "classnames"
-import { WidgetView } from "./views"
-import WidgetBar from "./WidgetBar"
-import DebugView from "./DebugView"
-import { Cross2Icon, DragHandleDots2Icon } from "@radix-ui/react-icons"
-import { getSupportedViews } from "./views/view-type-registry"
-
-export interface CreateWidgetDragData {
-  type: "create"
-  offsetX: number
-  offsetY: number
-  entityData: EntityData
-}
+import { uuid } from "@automerge/automerge"
+import moment from "moment"
+import { WeatherWidget } from "./widgets/WeatherWidget"
 
 export interface MoveWidgetDragData {
   type: "move"
   offsetX: number
   offsetY: number
-  entityId: string
+  index: number
 }
 
-export type DragData = CreateWidgetDragData | MoveWidgetDragData
+export interface CreateWidgetDragData {
+  type: "create"
+  offsetX: number
+  offsetY: number
+  width: number
+  height: number
+  widget: Widget
+}
 
-export function Board() {
-  const entities = useEntities()
-  const createEntity = useCreateEntity()
-  const widgets = getWidgets(entities)
+type DragData = MoveWidgetDragData | CreateWidgetDragData
+
+const INITIAL_WIDGETS: WidgetOnBoard[] = [
+  {
+    x: 100,
+    y: 100,
+    width: 600,
+    height: 600,
+    widget: {
+      id: uuid(),
+      type: "map",
+      locationWidget: {
+        id: uuid(),
+        type: "location",
+        name: "current location",
+        latLng: {
+          lat: 50.775555,
+          lng: 6.083611,
+        },
+      },
+    },
+  },
+  {
+    x: 800,
+    y: 800,
+    width: 400,
+    height: 600,
+    widget: {
+      id: uuid(),
+      type: "poiFinder",
+    },
+  },
+  {
+    x: 800,
+    y: 100,
+    width: 400,
+    height: 300,
+    widget: {
+      id: uuid(),
+      type: "weather",
+      calendarWidget: {
+        id: uuid(),
+        type: "calendar",
+        date: moment().unix() * 1000,
+      },
+    } as WeatherWidget,
+  },
+]
+
+export function createBoardDoc(repo: Repo) {
+  const handle = repo.create<BoardDoc>()
+
+  handle.change((doc) => {
+    doc.widgets = INITIAL_WIDGETS
+  })
+
+  return handle
+}
+
+interface BoardDoc {
+  widgets: WidgetOnBoard[]
+}
+
+interface WidgetOnBoard {
+  widget: Widget
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+interface BoardViewDoc {
+  docId: DocumentId
+}
+
+export function BoardView({ docId }: BoardViewDoc) {
+  const [doc, changeDoc] = useDocument<BoardDoc>(docId)
+
+  if (!doc) {
+    return null
+  }
 
   const onDragEnter = (evt: React.DragEvent) => {
     evt.preventDefault()
@@ -47,25 +116,34 @@ export function Board() {
   const onDrop = (evt: React.DragEvent) => {
     const dragData = JSON.parse(evt.dataTransfer.getData("application/drag-data")) as DragData
 
-    let widget: EntityRef<WidgetEntityProps> | undefined
+    const x = evt.pageX - dragData.offsetX
+    const y = evt.pageY - dragData.offsetY
 
-    switch (dragData.type) {
-      case "create":
-        widget = createEntity(dragData.entityData) as EntityRef<WidgetEntityProps>
-        break
+    changeDoc((doc) => {
+      switch (dragData.type) {
+        case "create":
+          const widgetOnBoard = {
+            x: x,
+            y: y,
+            width: dragData.width,
+            height: dragData.height,
+            widget: dragData.widget,
+          }
 
-      case "move":
-        widget = entities[dragData.entityId] as EntityRef<WidgetEntityProps>
-        break
-    }
+          doc.widgets.push(widgetOnBoard)
+          break
 
-    if (!widget) {
-      return
-    }
-
-    widget.replace("x", evt.pageX - dragData.offsetX)
-    widget.replace("y", evt.pageY - dragData.offsetY)
+        case "move": {
+          const widgetOnBoard = doc.widgets[dragData.index]
+          widgetOnBoard.x = x
+          widgetOnBoard.y = y
+          break
+        }
+      }
+    })
   }
+
+  const boardWidgets = doc.widgets
 
   return (
     <div
@@ -78,45 +156,46 @@ export function Board() {
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
     >
-      {widgets.map((widget) => (
-        <WidgetContainer entity={widget} key={widget.id} />
+      {boardWidgets.map((boardWidget, index) => (
+        <BoardWidgetView
+          x={boardWidget.x}
+          y={boardWidget.y}
+          boardWidgets={boardWidgets}
+          width={boardWidget.width}
+          height={boardWidget.height}
+          widget={boardWidget.widget}
+          key={index}
+          index={index}
+          onChange={(changeWidget) => {
+            changeDoc((doc) => changeWidget(doc.widgets[index].widget))
+          }}
+        />
       ))}
-
-      <WidgetBar />
-
-      <DebugView />
     </div>
   )
 }
 
-export interface WidgetEntityProps {
+interface BoardWidgetView {
+  index: number
   x: number
   y: number
   width: number
   height: number
-  isHovered: boolean
+  widget: Widget
+  boardWidgets: WidgetOnBoard[]
+  onChange: (fn: (widget: Widget) => void) => void
 }
 
-export function isWidget(entity: UnknownEntityRef): entity is EntityRef<WidgetEntityProps> {
-  return (
-    entity.data.width !== undefined &&
-    entity.data.height !== undefined &&
-    entity.data.x !== undefined &&
-    entity.data.y !== undefined
-  )
-}
-
-export function getWidgets(
-  entities: UnknownEntityRef[] | EntityMap
-): EntityRef<WidgetEntityProps>[] {
-  return Object.values(entities).filter(isWidget)
-}
-
-interface WidgetContainerProps {
-  entity: EntityRef<WidgetEntityProps>
-}
-
-function WidgetContainer({ entity }: WidgetContainerProps) {
+function BoardWidgetView({
+  widget,
+  boardWidgets,
+  x,
+  y,
+  width,
+  height,
+  onChange,
+  index,
+}: BoardWidgetView) {
   const [isDragged, setIsDragged] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -131,7 +210,7 @@ function WidgetContainer({ entity }: WidgetContainerProps) {
       "application/drag-data",
       JSON.stringify({
         type: "move",
-        entityId: entity.id,
+        index: index,
         offsetX: evt.clientX - bounds.left,
         offsetY: evt.clientY - bounds.top,
       } as MoveWidgetDragData)
@@ -145,8 +224,9 @@ function WidgetContainer({ entity }: WidgetContainerProps) {
     setTimeout(() => setIsDragged(false))
   }
 
-  const supportedViews = getSupportedViews(entity.data)
-  const selectedView = supportedViews[0]
+  const widgetsInScope = boardWidgets
+    .map(({ widget }) => widget)
+    .filter((otherWidget) => otherWidget.id !== widget.id)
 
   return (
     <div
@@ -156,30 +236,15 @@ function WidgetContainer({ entity }: WidgetContainerProps) {
       onDragEnd={onDragEnd}
       className={classNames("absolute", {
         "opacity-0": isDragged,
-        "shadow-xl": entity.data.isHovered,
       })}
-      onMouseOver={() => entity.replace("isHovered", true)}
-      onMouseLeave={() => entity.retract("isHovered")}
       style={{
-        transform: `translate(${entity.data.x}px,${entity.data.y}px)`,
-        width: entity.data.width,
-        height: entity.data.height,
+        transform: `translate(${x}px,${y}px)`,
+        width: width,
+        height: height,
       }}
     >
-      <div className="rounded bg-white shadow overflow-auto w-full h-full flex flex-col">
-        <div className="bg-gray p-1 text-xs text-gray-500 flex gap-1 border-b border-color-gray-100">
-          <DragHandleDots2Icon />
-
-          {selectedView.name}
-
-          <div className="flex-1"></div>
-
-          <button onClick={() => entity.destroy()}>
-            <Cross2Icon />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-auto">{createElement(selectedView.view, { entity })}</div>
+      <div className="rounded-xl bg-white shadow w-full h-full flex flex-col">
+        <WidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
       </div>
     </div>
   )

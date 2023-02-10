@@ -166,7 +166,7 @@ export function LocationPickerView({
 
 interface LocationStackViewProps {
   widgets: LocationWidget[]
-  selectedWidgetId: string
+  selectedWidgetId?: string
   onSelectWidgetId: (id: string) => void
 }
 
