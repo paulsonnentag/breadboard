@@ -6,6 +6,7 @@ import classNames from "classnames"
 import { uuid } from "@automerge/automerge"
 import moment from "moment"
 import { WeatherWidget } from "./widgets/WeatherWidget"
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 export interface MoveWidgetDragData {
   type: "move"
@@ -169,6 +170,9 @@ export function BoardView({ docId }: BoardViewDoc) {
           onChange={(changeWidget) => {
             changeDoc((doc) => changeWidget(doc.widgets[index].widget))
           }}
+          onDelete={() => {
+            changeDoc((doc) => delete doc.widgets[index])
+          }}
         />
       ))}
     </div>
@@ -184,9 +188,11 @@ interface BoardWidgetView {
   widget: Widget
   boardWidgets: WidgetOnBoard[]
   onChange: (fn: (widget: Widget) => void) => void
+  onDelete: () => void
 }
 
 function BoardWidgetView({
+  index,
   widget,
   boardWidgets,
   x,
@@ -194,7 +200,7 @@ function BoardWidgetView({
   width,
   height,
   onChange,
-  index,
+  onDelete,
 }: BoardWidgetView) {
   const [isDragged, setIsDragged] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -243,7 +249,10 @@ function BoardWidgetView({
         height: height,
       }}
     >
-      <div className="rounded-xl bg-white shadow w-full h-full flex flex-col">
+      <div className="rounded-xl bg-white shadow w-full h-full flex flex-col relative">
+        <button className="absolute left-full ml-1 text-xl" onClick={() => onDelete()}>
+          <Cross2Icon />
+        </button>
         <WidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
       </div>
     </div>

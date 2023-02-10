@@ -247,8 +247,8 @@ export function PoiResultWidgetView({ widget, widgetsInScope }: PoiResultWidgetV
         {widget.phoneNumber && <a href={`tel:${widget.phoneNumber}`}>{widget.phoneNumber}</a>}
 
         <div className="h-[150px] flex gap-1 w-full overflow-auto">
-          {widget.photos.map((photo) => (
-            <img src={photo} className="h-full" />
+          {widget.photos.map((photo, index) => (
+            <img src={photo} className="h-full" key={index} />
           ))}
         </div>
       </div>
