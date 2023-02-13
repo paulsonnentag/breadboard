@@ -1,6 +1,5 @@
 import { MapWidgetView, MapWidget, MapLocation } from "./MapWidget"
 import { WeatherWidgetView, WeatherWidget } from "./WeatherWidget"
-import { LocationWidgetView, LocationWidget } from "./LocationWidget"
 import {
   PoiFinderWidget,
   PoiFinderWidgetView,
@@ -10,16 +9,8 @@ import {
 import { CalendarWidget } from "./CalendarWidget"
 import LatLngLiteral = google.maps.LatLngLiteral
 import { uniqBy } from "lodash"
-import { PathWidget, PathWidgetView } from "./PathWidget"
 
-export type Widget =
-  | PathWidget
-  | MapWidget
-  | WeatherWidget
-  | LocationWidget
-  | PoiFinderWidget
-  | CalendarWidget
-  | PoiResultWidget
+export type Widget = MapWidget | WeatherWidget | PoiFinderWidget | CalendarWidget | PoiResultWidget
 
 interface WidgetViewProps {
   widget: Widget

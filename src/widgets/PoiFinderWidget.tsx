@@ -1,12 +1,11 @@
-import { getLocationWidgets, getMapLocations, Widget } from "./index"
-import { LocationStackView } from "./LocationWidget"
-import { DragEventHandler, useEffect, useMemo, useRef, useState } from "react"
-import LatLngLiteral = google.maps.LatLngLiteral
-import LatLng = google.maps.LatLng
-import PlaceResult = google.maps.places.PlaceResult
+import { getMapLocations, Widget } from "./index"
+import { DragEventHandler, useEffect, useMemo } from "react"
 import { uuid } from "@automerge/automerge"
 import { CreateWidgetDragData } from "../PathBoard"
 import { Cross2Icon } from "@radix-ui/react-icons"
+import LatLngLiteral = google.maps.LatLngLiteral
+import LatLng = google.maps.LatLng
+import PlaceResult = google.maps.places.PlaceResult
 
 export interface PoiFinderWidget {
   id: string

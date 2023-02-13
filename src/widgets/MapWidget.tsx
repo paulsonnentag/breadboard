@@ -1,6 +1,8 @@
 import { getWidgetsOnMap, Widget } from "./index"
 import { useEffect, useId, useMemo, useRef, useState } from "react"
 import { debounce } from "lodash"
+import { Cross2Icon } from "@radix-ui/react-icons"
+import { useOnClickOutside } from "../hooks"
 import LatLngLiteral = google.maps.LatLngLiteral
 import Map = google.maps.Map
 import LatLng = google.maps.LatLng
@@ -8,8 +10,6 @@ import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 import MapsEventListener = google.maps.MapsEventListener
-import { ArrowUpIcon, Cross2Icon, ResetIcon } from "@radix-ui/react-icons"
-import { useOnClickOutside } from "../hooks"
 import AutocompletePrediction = google.maps.places.AutocompletePrediction
 
 export interface MapLocation {

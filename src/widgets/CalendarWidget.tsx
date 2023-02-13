@@ -1,9 +1,5 @@
-import { Widget } from "./index"
-import moment, { Moment } from "moment"
-import { useRef, useState } from "react"
-import { useOnClickOutside } from "../hooks"
-import { ArrowUpIcon, ChevronLeftIcon, ChevronRightIcon, ResetIcon } from "@radix-ui/react-icons"
-import { LocationOverride, LocationWidget, LocationWidgetView } from "./LocationWidget"
+import moment from "moment"
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 import colors from "tailwindcss/colors"
 
 export interface CalendarWidget {
