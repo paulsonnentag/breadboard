@@ -1,23 +1,34 @@
+import { getWidgetsOnMap, Widget } from "./index"
 import { useEffect, useId, useMemo, useRef, useState } from "react"
-import { LocationOverride, LocationWidget } from "./LocationWidget"
+import { LocationOverride } from "./LocationWidget"
+import { debounce } from "lodash"
+import LatLngLiteral = google.maps.LatLngLiteral
 import Map = google.maps.Map
 import LatLng = google.maps.LatLng
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 import MapsEventListener = google.maps.MapsEventListener
-import { debounce } from "lodash"
+
+export interface MapLocation {
+  name: string
+  latLng: LatLngLiteral
+  widget?: Widget
+}
 
 export interface MapWidget {
   id: string
   type: "map"
+  location: MapLocation
 }
 
 interface MapWidgetViewProps {
   widget: MapWidget
+  widgetsInScope: Widget[]
+  onChange: (fn: (widget: MapWidget) => void) => void
 }
 
-export function MapWidgetView({ widget }: MapWidgetViewProps) {
+export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetViewProps) {
   const mapId = useId()
   const mapRef = useRef<Map>()
   const listenersRef = useRef<MapsEventListener[]>([])
@@ -25,6 +36,7 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [currentOverride, setCurrentOverride] = useState<LocationOverride>()
   const geoCoder = useMemo(() => new google.maps.Geocoder(), [])
+  const widgetsOnMap = getWidgetsOnMap(widgetsInScope)
 
   // init map
 
@@ -38,7 +50,7 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
       mapId,
 
       zoom: 11,
-      center: widget.locationWidget.latLng,
+      center: widget.location.latLng,
 
       // disable additional ui controls
       streetView: null,
@@ -59,7 +71,7 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
     const onChangeMapView = debounce(() => {
       const center = currentMap.getCenter()
 
-      if (center && !center.equals(new LatLng(widget.locationWidget.latLng))) {
+      if (center && !center.equals(new LatLng(widget.location.latLng))) {
         geoCoder.geocode({ location: center }, (results) => {
           const mapBounds = currentMap.getBounds()
 
@@ -69,9 +81,9 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
 
           let biggestContainedResult = getBiggestContainedResult(mapBounds, results)
 
-          setCurrentOverride({
-            name: biggestContainedResult.formatted_address,
-            latLng: center.toJSON(),
+          onChange((widget) => {
+            widget.location.name = biggestContainedResult.formatted_address
+            widget.location.latLng = center.toJSON()
           })
         })
       }
@@ -90,7 +102,6 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
 
   // update markers
 
-  /*
   useEffect(() => {
     if (!mapRef.current) {
       return
@@ -128,40 +139,40 @@ export function MapWidgetView({ widget }: MapWidgetViewProps) {
 
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer bg-red-500`
 
-
+      /*
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
         geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
       }`
-
-
       markerContent.onmouseenter = () => {
         geoMarker.entity.replace("isHovered", true)
       }
       markerContent.onmouseleave = () => {
         geoMarker.entity.retract("isHovered")
       }
-
-
+       */
 
       mapsMarker.position = new LatLng(geoMarker.latLng)
 
       // mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
     }
   }, [widgetsOnMap, mapRef.current])
-*/
 
   useEffect(() => {
     if (
       mapRef.current &&
       !currentOverride &&
-      !mapRef.current?.getCenter()?.equals(new LatLng(widget.locationWidget.latLng))
+      !mapRef.current?.getCenter()?.equals(new LatLng(widget.location.latLng))
     ) {
-      mapRef.current.setCenter(widget.locationWidget.latLng)
+      mapRef.current.setCenter(widget.location.latLng)
     }
-  }, [widget.locationWidget.latLng, currentOverride])
+  }, [widget.location.latLng, currentOverride])
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full bg-white rounded-xl shadow overflow-hidden">
+      <div className="flex p-2 items-center justify-between">
+        <div className="text-green-600 p-2">Map</div>
+      </div>
+
       <div
         className="flex-1"
         ref={containerRef}

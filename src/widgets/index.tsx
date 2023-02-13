@@ -1,4 +1,4 @@
-import { MapWidgetView, MapWidget } from "./MapWidget"
+import { MapWidgetView, MapWidget, MapLocation } from "./MapWidget"
 import { WeatherWidgetView, WeatherWidget } from "./WeatherWidget"
 import { LocationWidgetView, LocationWidget } from "./LocationWidget"
 import {
@@ -10,7 +10,6 @@ import {
 import { CalendarWidget } from "./CalendarWidget"
 import LatLngLiteral = google.maps.LatLngLiteral
 import { uniqBy } from "lodash"
-import { useWidget } from "../store"
 import { PathWidget, PathWidgetView } from "./PathWidget"
 
 export type Widget =
@@ -23,23 +22,20 @@ export type Widget =
   | PoiResultWidget
 
 interface WidgetViewProps {
-  id: string
+  widget: Widget
+  widgetsInScope: Widget[]
+  onChange: (fn: (widget: any) => void) => void
 }
 
-export function WidgetView({ id }: WidgetViewProps) {
-  const widget = useWidget(id)
-
+export function WidgetView({ widget, widgetsInScope, onChange }: WidgetViewProps) {
   switch (widget.type) {
     /* case "weather":
       return (
         <WeatherWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
       ) */
 
-    case "path":
-      return <PathWidgetView widget={widget} />
-
     case "map":
-      return <MapWidgetView widget={widget} />
+      return <MapWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
 
     /*
     case "location":
@@ -58,29 +54,27 @@ export function WidgetView({ id }: WidgetViewProps) {
   }
 }
 
-export function getLocationWidgets(widgets: Widget[]) {
-  // hack filter uniqueness to eliminate duplicates, for example when poiresult is multiple times on board
-  return uniqBy(widgets.flatMap(getLocationsOfWidget), (w: Widget) => w.id)
+export function getMapLocations(widgets: Widget[]) {
+  return widgets.flatMap(getMapLocationsOfWidget)
 }
 
-function getLocationsOfWidget(widget: Widget): LocationWidget[] {
+function getMapLocationsOfWidget(widget: Widget): MapLocation[] {
   switch (widget.type) {
     case "map":
-      return [widget.locationWidget]
+      return [widget.location]
 
     case "location":
       return [widget]
 
     case "poiFinder":
-      return widget.results ? widget.results.pois.flatMap(getLocationsOfWidget) : []
+      return widget.results ? widget.results.pois.flatMap(getMapLocationsOfWidget) : []
 
     case "poiResult":
       return [
         {
-          id: widget.id,
-          type: "location",
           name: widget.name,
           latLng: widget.latLng,
+          widget: widget,
         },
       ]
 

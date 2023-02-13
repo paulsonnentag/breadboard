@@ -5,7 +5,7 @@ import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import PlaceResult = google.maps.places.PlaceResult
 import { uuid } from "@automerge/automerge"
-import { CreateWidgetDragData } from "../Board"
+import { CreateWidgetDragData } from "../Path"
 
 export interface PoiFinderWidget {
   id: string
