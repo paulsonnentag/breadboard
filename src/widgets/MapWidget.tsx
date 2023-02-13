@@ -9,6 +9,7 @@ import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 import MapsEventListener = google.maps.MapsEventListener
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 export interface MapLocation {
   name: string
@@ -26,9 +27,10 @@ interface MapWidgetViewProps {
   widget: MapWidget
   widgetsInScope: Widget[]
   onChange: (fn: (widget: MapWidget) => void) => void
+  onDestroy: () => void
 }
 
-export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetViewProps) {
+export function MapWidgetView({ widget, onChange, widgetsInScope, onDestroy }: MapWidgetViewProps) {
   const mapId = useId()
   const mapRef = useRef<Map>()
   const listenersRef = useRef<MapsEventListener[]>([])
@@ -171,6 +173,10 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
     <div className="flex flex-col w-full h-full bg-white rounded-xl shadow overflow-hidden">
       <div className="flex p-2 items-center justify-between">
         <div className="text-green-600 p-2">Map</div>
+
+        <button onClick={onDestroy}>
+          <Cross2Icon />
+        </button>
       </div>
 
       <div

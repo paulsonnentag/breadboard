@@ -5,7 +5,8 @@ import LatLngLiteral = google.maps.LatLngLiteral
 import LatLng = google.maps.LatLng
 import PlaceResult = google.maps.places.PlaceResult
 import { uuid } from "@automerge/automerge"
-import { CreateWidgetDragData } from "../Path"
+import { CreateWidgetDragData } from "../PathBoard"
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 export interface PoiFinderWidget {
   id: string
@@ -21,10 +22,16 @@ interface PoiResults {
 interface PoiFinderViewProps {
   widget: PoiFinderWidget
   onChange: (fn: (widget: PoiFinderWidget) => void) => void
+  onDestroy: () => void
   widgetsInScope: Widget[]
 }
 
-export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFinderViewProps) {
+export function PoiFinderWidgetView({
+  widget,
+  onChange,
+  onDestroy,
+  widgetsInScope,
+}: PoiFinderViewProps) {
   const mapLocations = getMapLocations(widgetsInScope)
 
   const selectedLocation = mapLocations[0]
@@ -149,7 +156,9 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-green-600 p-2">Campground Finder</div>
 
-        <div className="flex gap-1"></div>
+        <button onClick={onDestroy}>
+          <Cross2Icon />
+        </button>
       </div>
 
       {widget.results && (
@@ -208,14 +217,21 @@ function PoiResultWidgetListItemView({ widget }: PoiResultWidgetListItemViewProp
 interface PoiResultWidgetViewProps {
   widget: PoiResultWidget
   widgetsInScope: Widget[]
+  onDestroy: () => void
 }
 
-export function PoiResultWidgetView({ widget, widgetsInScope }: PoiResultWidgetViewProps) {
+export function PoiResultWidgetView({
+  widget,
+  widgetsInScope,
+  onDestroy,
+}: PoiResultWidgetViewProps) {
   return (
     <div className="flex flex-col w-full h-full bg-white rounded-xl overflow-hidden">
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-green-600 p-2">Place</div>
-        <div className="flex gap-1"></div>
+        <button onClick={onDestroy}>
+          <Cross2Icon />
+        </button>
       </div>
       <div
         className="flex-1 overflow-auto p-4 bg-gray-100  flex flex-col gap-1"

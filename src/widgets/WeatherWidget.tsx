@@ -3,6 +3,7 @@ import { LocationStackView } from "./LocationWidget"
 import { useEffect, useState } from "react"
 import moment, { Moment } from "moment"
 import { CalendarPickerView, CalendarWidget } from "./CalendarWidget"
+import { Cross2Icon } from "@radix-ui/react-icons"
 
 export interface WeatherWidget {
   id: string
@@ -12,6 +13,7 @@ export interface WeatherWidget {
 interface WeatherWidgetViewProps {
   widget: WeatherWidget
   onChange: (fn: (widget: WeatherWidget) => void) => void
+  onDestroy: () => void
   widgetsInScope: Widget[]
 }
 
@@ -21,7 +23,12 @@ interface Prediction {
   temperature: number
 }
 
-export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherWidgetViewProps) {
+export function WeatherWidgetView({
+  widget,
+  onChange,
+  widgetsInScope,
+  onDestroy,
+}: WeatherWidgetViewProps) {
   const mapLocations = getMapLocations(widgetsInScope)
 
   const selectedLocation = mapLocations[0]
@@ -66,6 +73,10 @@ export function WeatherWidgetView({ widget, onChange, widgetsInScope }: WeatherW
     <div className="flex flex-col w-full h-full bg-white rounded-xl overflow-hidden">
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-yellow-600 p-2">Weather</div>
+
+        <button onClick={onDestroy}>
+          <Cross2Icon />
+        </button>
       </div>
 
       {currentPrediction && (

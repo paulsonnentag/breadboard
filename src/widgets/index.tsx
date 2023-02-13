@@ -25,28 +25,49 @@ interface WidgetViewProps {
   widget: Widget
   widgetsInScope: Widget[]
   onChange: (fn: (widget: any) => void) => void
+  onDestroy: () => void
 }
 
-export function WidgetView({ widget, widgetsInScope, onChange }: WidgetViewProps) {
+export function WidgetView({ widget, widgetsInScope, onChange, onDestroy }: WidgetViewProps) {
   switch (widget.type) {
     case "weather":
       return (
-        <WeatherWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
+        <WeatherWidgetView
+          widget={widget}
+          widgetsInScope={widgetsInScope}
+          onChange={onChange}
+          onDestroy={onDestroy}
+        />
       )
 
     case "map":
-      return <MapWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
-
-    case "location":
-      return <LocationWidgetView widget={widget} onChange={onChange} />
+      return (
+        <MapWidgetView
+          widget={widget}
+          widgetsInScope={widgetsInScope}
+          onChange={onChange}
+          onDestroy={onDestroy}
+        />
+      )
 
     case "poiFinder":
       return (
-        <PoiFinderWidgetView widget={widget} onChange={onChange} widgetsInScope={widgetsInScope} />
+        <PoiFinderWidgetView
+          widget={widget}
+          onChange={onChange}
+          widgetsInScope={widgetsInScope}
+          onDestroy={onDestroy}
+        />
       )
 
     case "poiResult":
-      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} />
+      return (
+        <PoiResultWidgetView
+          widget={widget}
+          widgetsInScope={widgetsInScope}
+          onDestroy={onDestroy}
+        />
+      )
 
     default:
       return <span>not implemented {widget.type}</span>

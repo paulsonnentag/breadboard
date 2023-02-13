@@ -5,7 +5,7 @@ import { RepoContext } from "automerge-repo-react-hooks"
 import "./index.css"
 import { LocalForageStorageAdapter } from "automerge-repo-storage-localforage"
 import { BrowserWebSocketClientAdapter } from "automerge-repo-network-websocket"
-import { createPathDoc, PathView } from "./Path"
+import { createPathBoardDoc, PathBoardView, PathView } from "./PathBoard"
 
 const url = "ws://67.207.88.83" // cloud sync server on DigitalOcean
 
@@ -20,7 +20,7 @@ const params = new URLSearchParams(window.location.search)
 let documentId = params.get("documentId") as DocumentId
 
 if (!documentId) {
-  const handle = createPathDoc(repo)
+  const handle = createPathBoardDoc(repo)
   documentId = handle.documentId
   window.history.replaceState(null, "", `?documentId=${documentId}`)
 }
@@ -28,7 +28,7 @@ if (!documentId) {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <RepoContext.Provider value={repo}>
-      <PathView documentId={documentId} />
+      <PathBoardView documentId={documentId} />
     </RepoContext.Provider>
   </React.StrictMode>
 )
