@@ -1,4 +1,4 @@
-import { getLocationWidgets, Widget } from "./index"
+import { getLocationWidgets, getMapLocations, Widget } from "./index"
 import { LocationStackView } from "./LocationWidget"
 import { DragEventHandler, useEffect, useMemo, useRef, useState } from "react"
 import LatLngLiteral = google.maps.LatLngLiteral
@@ -10,7 +10,6 @@ import { CreateWidgetDragData } from "../Path"
 export interface PoiFinderWidget {
   id: string
   type: "poiFinder"
-  selectedLocationId?: string
   results?: PoiResults
 }
 
@@ -26,11 +25,9 @@ interface PoiFinderViewProps {
 }
 
 export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFinderViewProps) {
-  const locationWidgets = getLocationWidgets(widgetsInScope)
+  const mapLocations = getMapLocations(widgetsInScope)
 
-  const selectedLocation =
-    locationWidgets.find((location) => location.id === widget.selectedLocationId) ??
-    locationWidgets[0]
+  const selectedLocation = mapLocations[0]
 
   const placesService = useMemo(() => {
     // the api requires that you display copyright info, that's why we pass in this dummy div
@@ -137,8 +134,6 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
           }
         )
 
-        console.log("fetch pois")
-
         onChange((widget) => {
           widget.results = {
             latLng: new LatLng(selectedLocation.latLng).toJSON(), // convert to latlng first to remove automerge references
@@ -150,19 +145,11 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
   }, [selectedLocation.latLng.lat, selectedLocation.latLng.lng])
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full bg-white rounded-xl bg-white">
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-green-600 p-2">Campground Finder</div>
 
-        <div className="flex gap-1">
-          <LocationStackView
-            widgets={locationWidgets}
-            selectedWidgetId={widget.selectedLocationId}
-            onSelectWidgetId={(widgetId) => {
-              onChange((widget) => (widget.selectedLocationId = widgetId))
-            }}
-          />
-        </div>
+        <div className="flex gap-1"></div>
       </div>
 
       {widget.results && (
@@ -231,7 +218,7 @@ interface PoiResultWidgetViewProps {
 
 export function PoiResultWidgetView({ widget, widgetsInScope }: PoiResultWidgetViewProps) {
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full bg-white rounded-xl overflow-hidden">
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-green-600 p-2">Place</div>
         <div className="flex gap-1"></div>

@@ -40,11 +40,14 @@ export function WidgetView({ widget, widgetsInScope, onChange }: WidgetViewProps
     /*
     case "location":
       return <LocationWidgetView widget={widget} onChange={onChange} />
+*/
 
     case "poiFinder":
       return (
         <PoiFinderWidgetView widget={widget} onChange={onChange} widgetsInScope={widgetsInScope} />
       )
+
+    /*
 
     case "poiResult":
       return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} /> */

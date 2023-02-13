@@ -9,6 +9,8 @@ import { WeatherWidget } from "./widgets/WeatherWidget"
 import { Cross2Icon } from "@radix-ui/react-icons"
 import WidgetBar from "./WidgetBar"
 import { MapWidget } from "./widgets/MapWidget"
+import { PoiFinderWidget } from "./widgets/PoiFinderWidget"
+import { v4 } from "uuid"
 
 export interface MoveWidgetDragData {
   type: "move"
@@ -98,6 +100,7 @@ export function PathView({ documentId }: PathViewDoc) {
   const onAddMap = () => {
     changeDoc((doc: PathDoc) => {
       doc.widgets.push({
+        id: v4(),
         type: "map",
         location: {
           name: "current location",
@@ -107,6 +110,15 @@ export function PathView({ documentId }: PathViewDoc) {
           },
         },
       } as MapWidget)
+    })
+  }
+
+  const onAddCampgroundFinder = () => {
+    changeDoc((doc: PathDoc) => {
+      doc.widgets.push({
+        id: v4(),
+        type: "poiFinder",
+      } as PoiFinderWidget)
     })
   }
 
@@ -129,22 +141,28 @@ export function PathView({ documentId }: PathViewDoc) {
         <button className="bg-gray-500 text-white p-2 rounded-xl" onClick={onAddMap}>
           + Map
         </button>
+
+        <button className="bg-gray-500 text-white p-2 rounded-xl" onClick={onAddCampgroundFinder}>
+          + Campground finder
+        </button>
       </div>
 
-      {widgets.map((widget, index) => (
-        <div className="w-[500px] h-[500px]" key={index}>
-          <WidgetView
-            key={index}
-            widget={widget}
-            widgetsInScope={widgets}
-            onChange={(changeWidget) => {
-              changeDoc((doc) => {
-                changeWidget(doc.widgets[index])
-              })
-            }}
-          />
-        </div>
-      ))}
+      <div className="flex gap-2">
+        {widgets.map((widget, index) => (
+          <div className="w-[500px] h-[500px]" key={index}>
+            <WidgetView
+              key={index}
+              widget={widget}
+              widgetsInScope={widgets}
+              onChange={(changeWidget) => {
+                changeDoc((doc) => {
+                  changeWidget(doc.widgets[index])
+                })
+              }}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
