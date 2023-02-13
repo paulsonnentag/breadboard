@@ -1,33 +1,23 @@
-import { getWidgetsOnMap, Widget } from "./index"
-import LatLngLiteral = google.maps.LatLngLiteral
-import Map = google.maps.Map
 import { useEffect, useId, useMemo, useRef, useState } from "react"
+import { LocationOverride, LocationWidget } from "./LocationWidget"
+import Map = google.maps.Map
 import LatLng = google.maps.LatLng
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView
-import {
-  LocationPickerView,
-  LocationOverride,
-  LocationWidget,
-  LocationWidgetView,
-} from "./LocationWidget"
-import { debounce } from "lodash"
 import LatLngBounds = google.maps.LatLngBounds
 import GeocoderResult = google.maps.GeocoderResult
 import MapsEventListener = google.maps.MapsEventListener
+import { debounce } from "lodash"
 
 export interface MapWidget {
   id: string
   type: "map"
-  locationWidget: LocationWidget
 }
 
 interface MapWidgetViewProps {
   widget: MapWidget
-  widgetsInScope: Widget[]
-  onChange: (fn: (widget: MapWidget) => void) => void
 }
 
-export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetViewProps) {
+export function MapWidgetView({ widget }: MapWidgetViewProps) {
   const mapId = useId()
   const mapRef = useRef<Map>()
   const listenersRef = useRef<MapsEventListener[]>([])
@@ -35,7 +25,6 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
   const containerRef = useRef<HTMLDivElement>(null)
   const [currentOverride, setCurrentOverride] = useState<LocationOverride>()
   const geoCoder = useMemo(() => new google.maps.Geocoder(), [])
-  const widgetsOnMap = getWidgetsOnMap(widgetsInScope)
 
   // init map
 
@@ -101,6 +90,7 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
 
   // update markers
 
+  /*
   useEffect(() => {
     if (!mapRef.current) {
       return
@@ -138,7 +128,7 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
 
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer bg-red-500`
 
-      /*
+
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
         geoMarker.entity.data.isHovered ? "bg-red-500" : "bg-blue-500"
       }`
@@ -151,13 +141,14 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
         geoMarker.entity.retract("isHovered")
       }
 
-       */
+
 
       mapsMarker.position = new LatLng(geoMarker.latLng)
 
       // mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
     }
   }, [widgetsOnMap, mapRef.current])
+*/
 
   useEffect(() => {
     if (
@@ -169,30 +160,8 @@ export function MapWidgetView({ widget, onChange, widgetsInScope }: MapWidgetVie
     }
   }, [widget.locationWidget.latLng, currentOverride])
 
-  const contextWidgets = widget.locationWidget
-    ? widgetsInScope
-    : widgetsInScope.concat(widget.locationWidget)
-
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex p-2 items-center justify-between">
-        <div className="text-green-600 p-2">Map</div>
-
-        <LocationPickerView
-          override={currentOverride}
-          onResetOverride={() => {
-            setCurrentOverride(undefined)
-          }}
-          widget={widget.locationWidget}
-          onChange={(fn) =>
-            onChange((widget) => {
-              setCurrentOverride(undefined)
-              fn(widget.locationWidget)
-            })
-          }
-        />
-      </div>
-
       <div
         className="flex-1"
         ref={containerRef}

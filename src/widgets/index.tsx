@@ -10,8 +10,11 @@ import {
 import { CalendarWidget } from "./CalendarWidget"
 import LatLngLiteral = google.maps.LatLngLiteral
 import { uniqBy } from "lodash"
+import { useWidget } from "../store"
+import { PathWidget, PathWidgetView } from "./PathWidget"
 
 export type Widget =
+  | PathWidget
   | MapWidget
   | WeatherWidget
   | LocationWidget
@@ -20,21 +23,25 @@ export type Widget =
   | PoiResultWidget
 
 interface WidgetViewProps {
-  widget: Widget
-  widgetsInScope: Widget[]
-  onChange: (fn: (widget: any) => void) => void
+  id: string
 }
 
-export function WidgetView({ widget, onChange, widgetsInScope }: WidgetViewProps) {
+export function WidgetView({ id }: WidgetViewProps) {
+  const widget = useWidget(id)
+
   switch (widget.type) {
-    case "weather":
+    /* case "weather":
       return (
         <WeatherWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
-      )
+      ) */
+
+    case "path":
+      return <PathWidgetView widget={widget} />
 
     case "map":
-      return <MapWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
+      return <MapWidgetView widget={widget} />
 
+    /*
     case "location":
       return <LocationWidgetView widget={widget} onChange={onChange} />
 
@@ -44,7 +51,7 @@ export function WidgetView({ widget, onChange, widgetsInScope }: WidgetViewProps
       )
 
     case "poiResult":
-      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} />
+      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} /> */
 
     default:
       return <span>not implemented {widget.type}</span>
