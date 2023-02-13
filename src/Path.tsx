@@ -12,23 +12,12 @@ import { MapWidget } from "./widgets/MapWidget"
 import { PoiFinderWidget } from "./widgets/PoiFinderWidget"
 import { v4 } from "uuid"
 
-export interface MoveWidgetDragData {
-  type: "move"
-  offsetX: number
-  offsetY: number
-  index: number
-}
-
 export interface CreateWidgetDragData {
   type: "create"
-  offsetX: number
-  offsetY: number
-  width: number
-  height: number
   widget: Widget
 }
 
-type DragData = MoveWidgetDragData | CreateWidgetDragData
+type DragData = CreateWidgetDragData
 
 export function createPathDoc(repo: Repo) {
   const handle = repo.create<PathDoc>()
@@ -66,29 +55,11 @@ export function PathView({ documentId }: PathViewDoc) {
   const onDrop = (evt: React.DragEvent) => {
     const dragData = JSON.parse(evt.dataTransfer.getData("application/drag-data")) as DragData
 
-    const x = evt.pageX - dragData.offsetX
-    const y = evt.pageY - dragData.offsetY
-
     changeDoc((doc) => {
       switch (dragData.type) {
         case "create":
-          const widgetOnBoard = {
-            x: x,
-            y: y,
-            width: dragData.width,
-            height: dragData.height,
-            widget: dragData.widget,
-          }
-
-          doc.widgets.push(widgetOnBoard)
+          doc.widgets.push(dragData.widget)
           break
-
-        case "move": {
-          const widgetOnBoard = doc.widgets[dragData.index]
-          widgetOnBoard.x = x
-          widgetOnBoard.y = y
-          break
-        }
       }
     })
   }
@@ -122,6 +93,17 @@ export function PathView({ documentId }: PathViewDoc) {
     })
   }
 
+  const onAddWeather = () => {
+    changeDoc((doc: PathDoc) => {
+      doc.widgets.push({
+        id: v4(),
+        type: "weather",
+      } as WeatherWidget)
+    })
+  }
+
+  console.log(widgets)
+
   return (
     <div
       onDrop={onDrop}
@@ -129,15 +111,7 @@ export function PathView({ documentId }: PathViewDoc) {
       onDragOver={onDragOver}
       className="p-2 flex flex-col gap-2"
     >
-      <div className="flex gap-1">
-        {locations.map((location, index) => {
-          return (
-            <button className="bg-white text-purple-700 p-2 rounded-xl" key={index}>
-              {location.name}
-            </button>
-          )
-        })}
-
+      <div className="flex gap-2">
         <button className="bg-gray-500 text-white p-2 rounded-xl" onClick={onAddMap}>
           + Map
         </button>
@@ -145,6 +119,19 @@ export function PathView({ documentId }: PathViewDoc) {
         <button className="bg-gray-500 text-white p-2 rounded-xl" onClick={onAddCampgroundFinder}>
           + Campground finder
         </button>
+
+        <button className="bg-gray-500 text-white p-2 rounded-xl" onClick={onAddWeather}>
+          + Weather
+        </button>
+      </div>
+      <div className="flex gap-2">
+        {locations.map((location, index) => {
+          return (
+            <button className="bg-white text-purple-700 p-2 rounded-xl" key={index}>
+              {location.name}
+            </button>
+          )
+        })}
       </div>
 
       <div className="flex gap-2">

@@ -63,7 +63,7 @@ export function LocationWidgetView({ widget, onChange }: LocationWidgetViewProps
         <div className="text-purple-600 p-2">Location</div>
       </div>
 
-      <div className="p-2 flex flex-col gap-2 flex-1 bg-gray-100 rounded-b-xl">
+      <div className="p-2 flex flex-col gap-2 flex-1 bg-gray-100 ">
         <input
           className="text-base bg-gray-100"
           value={search}

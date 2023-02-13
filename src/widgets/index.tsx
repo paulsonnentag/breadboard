@@ -29,28 +29,24 @@ interface WidgetViewProps {
 
 export function WidgetView({ widget, widgetsInScope, onChange }: WidgetViewProps) {
   switch (widget.type) {
-    /* case "weather":
+    case "weather":
       return (
         <WeatherWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
-      ) */
+      )
 
     case "map":
       return <MapWidgetView widget={widget} widgetsInScope={widgetsInScope} onChange={onChange} />
 
-    /*
     case "location":
       return <LocationWidgetView widget={widget} onChange={onChange} />
-*/
 
     case "poiFinder":
       return (
         <PoiFinderWidgetView widget={widget} onChange={onChange} widgetsInScope={widgetsInScope} />
       )
 
-    /*
-
     case "poiResult":
-      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} /> */
+      return <PoiResultWidgetView widget={widget} widgetsInScope={widgetsInScope} />
 
     default:
       return <span>not implemented {widget.type}</span>

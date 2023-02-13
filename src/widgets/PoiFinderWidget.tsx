@@ -145,7 +145,7 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
   }, [selectedLocation.latLng.lat, selectedLocation.latLng.lng])
 
   return (
-    <div className="flex flex-col w-full h-full bg-white rounded-xl bg-white">
+    <div className="flex flex-col w-full h-full bg-white rounded-xl bg-white overflow-hidden">
       <div className="flex p-2 items-center justify-between border-b border-gray-300">
         <div className="text-green-600 p-2">Campground Finder</div>
 
@@ -153,7 +153,7 @@ export function PoiFinderWidgetView({ widget, onChange, widgetsInScope }: PoiFin
       </div>
 
       {widget.results && (
-        <div className="bg-gray-100 flex-1 p-2 rounded-b-xl overflow-auto" style={{ minHeight: 0 }}>
+        <div className="bg-gray-100 flex-1 p-2  overflow-auto" style={{ minHeight: 0 }}>
           <div className=" flex flex-col gap-2">
             {widget.results.pois.map((poiWidget, index) => (
               <PoiResultWidgetListItemView widget={poiWidget} key={index} />
@@ -183,17 +183,11 @@ interface PoiResultWidgetListItemViewProps {
 
 function PoiResultWidgetListItemView({ widget }: PoiResultWidgetListItemViewProps) {
   const onDragStart: DragEventHandler<HTMLDivElement> = (evt) => {
-    var bounds = (evt.target as HTMLDivElement).getBoundingClientRect()
-
     evt.dataTransfer.setData(
       "application/drag-data",
       JSON.stringify({
         type: "create",
         widget,
-        width: 400,
-        height: 400,
-        offsetX: evt.clientX - bounds.left,
-        offsetY: evt.clientY - bounds.top,
       } as CreateWidgetDragData)
     )
 
@@ -224,7 +218,7 @@ export function PoiResultWidgetView({ widget, widgetsInScope }: PoiResultWidgetV
         <div className="flex gap-1"></div>
       </div>
       <div
-        className="flex-1 overflow-auto p-4 bg-gray-100 rounded-b-xl flex flex-col gap-1"
+        className="flex-1 overflow-auto p-4 bg-gray-100  flex flex-col gap-1"
         style={{ minHeight: 0 }}
       >
         <h1 className="font-bold text-xl">{widget.name}</h1>
