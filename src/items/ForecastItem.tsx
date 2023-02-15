@@ -10,7 +10,7 @@ export const ForecastItemDefinition: ItemDefinition = {
   color: "text-yellow-500",
 
   getTitle: (value:any) => {
-    return "forecast"
+    return "Summary (TODO)"
   }
 
   // TODO: inputs - declared by provider, or item?

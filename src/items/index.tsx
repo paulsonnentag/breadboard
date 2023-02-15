@@ -46,7 +46,8 @@ export function ItemToken({ item }: ItemTokenProps) {
         {itemDef.icon}
       </span>
 
-      {itemDef.getTitle(item.value)}
+      {item.value && itemDef.getTitle(item.value)}
+      {!item.value && "Loading..."}
     </div>
   )
 }
