@@ -40,6 +40,8 @@ export function PathView({ path, addView, updateItems }: PathViewProps) {
             </div>
           ))}
 
+          <div className="w-2"></div>
+
           <EndOfPathView  createView={name => addView({ name })} />
         </div>
         </> 
@@ -55,8 +57,9 @@ interface EndOfPathViewProps {
 
 function EndOfPathView(props:EndOfPathViewProps) {
   return (
-    <div className="flex flex-col gap-2 items-center">
+    <div className="flex flex-col gap-2 items-center mt-2">
       <LittleSearchButton />
+      <div className="h-2"></div>
       <LittleQuickButton icon={MapViewDefinition.icon} color="text-green-600" onClick={() => { props.createView("map") }} />
       <LittleQuickButton icon="distance" color="text-lime-500" onClick={() => { props.createView("places") }} />
       <LittleQuickButton icon={WeatherViewDefinition.icon} color="text-yellow-500" onClick={() => { props.createView("weather") }} />
