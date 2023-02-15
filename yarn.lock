@@ -496,21 +496,7 @@
   resolved "https://registry.yarnpkg.com/@types/google.maps/-/google.maps-3.51.0.tgz#56198ebe9ecb9b83821a290ae2abe97b68e3d20b"
   integrity sha512-44/oQYjc5D6kxBcI3Qk9rk3IIOMwnlEMWDV7pwPJ2YI89s5Q1OzDrFvR7QJ3LFrpVXEhig+gyagFg54+foinFg==
 
-"@types/lodash.debounce@^4.0.7":
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/@types/lodash.debounce/-/lodash.debounce-4.0.7.tgz#0285879defb7cdb156ae633cecd62d5680eded9f"
-  integrity sha512-X1T4wMZ+gT000M2/91SYj0d/7JfeNZ9PeeOldSNoE/lunLeQXKvkmIumI29IaKMotU/ln/McOIvgzZcQ/3TrSA==
-  dependencies:
-    "@types/lodash" "*"
-
-"@types/lodash.uniq@^4.5.7":
-  version "4.5.7"
-  resolved "https://registry.yarnpkg.com/@types/lodash.uniq/-/lodash.uniq-4.5.7.tgz#0773960ec0148b29e6a54821a65b878a0ebb5c1a"
-  integrity sha512-qg7DeAbdZMi6DGvCxThlJycykLLhETrJrQZ6F2KaZ+o0sNK1qRHz46lgNA+nHHjwrmA2a91DyiZTp3ey3m1rEw==
-  dependencies:
-    "@types/lodash" "*"
-
-"@types/lodash@*", "@types/lodash@^4.14.191":
+"@types/lodash@^4.14.191":
   version "4.14.191"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.191.tgz#09511e7f7cba275acd8b419ddac8da9a6a79e2fa"
   integrity sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==
@@ -1271,20 +1257,10 @@ lodash.curry@^4.0.1:
   resolved "https://registry.yarnpkg.com/lodash.curry/-/lodash.curry-4.1.1.tgz#248e36072ede906501d75966200a86dab8b23170"
   integrity sha512-/u14pXGviLaweY5JI0IUzgzF2J6Ne8INyzAZjImcryjgkZ+ebruBxy2/JaOOkTqScddcYtakjhSaeemV8lR0tA==
 
-lodash.debounce@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
-  integrity sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==
-
 lodash.flow@^3.3.0:
   version "3.5.0"
   resolved "https://registry.yarnpkg.com/lodash.flow/-/lodash.flow-3.5.0.tgz#87bf40292b8cf83e4e8ce1a3ae4209e20071675a"
   integrity sha512-ff3BX/tSioo+XojX4MOsOMhJw0nZoUEF011LX8g8d3gvjVbxd89cCio4BCXronjxcTUIJUoqKEUA+n4CqvvRPw==
-
-lodash.uniq@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
-  integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
 lodash@^4.17.21:
   version "4.17.21"

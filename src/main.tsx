@@ -5,7 +5,8 @@ import { RepoContext } from "automerge-repo-react-hooks"
 import "./index.css"
 import { LocalForageStorageAdapter } from "automerge-repo-storage-localforage"
 import { BrowserWebSocketClientAdapter } from "automerge-repo-network-websocket"
-import { createPathBoardDoc, PathBoardView, PathView } from "./PathBoard"
+import { PathBoardView } from "./PathBoard"
+import { createPathBoardDoc } from "./store"
 
 const url = "ws://67.207.88.83" // cloud sync server on DigitalOcean
 

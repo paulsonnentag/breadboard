@@ -2,15 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-color: #e1e1e1;
-  --dot-color: #9b9b9b;
-  --dot-size: 1px;
-  --dot-space: 25px;
+body {
+  background: #F2F4F7;
 }
 
-.bg-dotted {
-  background: linear-gradient(90deg, var(--bg-color) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center,
-  linear-gradient(var(--bg-color) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center, var(--dot-color);
-  background-size: var(--dot-space) var(--dot-space);
+.bg-alt {
+  background: #E1E5EB;
 }
