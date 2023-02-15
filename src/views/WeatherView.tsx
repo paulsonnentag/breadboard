@@ -19,6 +19,7 @@ export const WeatherViewDefinition: ViewDefinition = {
   inputs: ["geolocation", "date", "forecast"],
   displayName: "Weather",
   color: "text-yellow-500",
+  icon: "clear_day",
 }
 
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000 - 1

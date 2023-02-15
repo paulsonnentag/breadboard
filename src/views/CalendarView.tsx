@@ -38,6 +38,7 @@ export const CalendarViewDefinition: ViewDefinition = {
   inputs: ["date"],
   displayName: "Calendar",
   color: "text-red-500",
+  icon: "calendar_month"
 }
 
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.

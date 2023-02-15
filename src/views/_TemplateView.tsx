@@ -6,6 +6,7 @@ export const WeatherViewDefinition: ViewDefinition = {
   inputs: ["geolocation", "date", "forecast"],
   displayName: "Weather",
   color: "text-yellow-500",
+  icon: "clear_day",
 }
 
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.

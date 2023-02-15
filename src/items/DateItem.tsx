@@ -7,7 +7,7 @@ export interface DateItem {
 
 export const DateItemDefinition: ItemDefinition = {
   type: "date",
-  icon: "",
+  icon: "calendar_month",
   color: "text-red-500",
 
   getTitle: (value: any) => {

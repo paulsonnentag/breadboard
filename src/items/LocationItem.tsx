@@ -8,7 +8,7 @@ export interface LocationItem {
 
 export const LocationItemDefinition: ItemDefinition = {
   type: "geolocation",
-  icon: "",
+  icon: "near_me",
   color: "text-purple-800",
 
   getTitle: (value:any) => {

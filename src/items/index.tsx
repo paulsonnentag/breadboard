@@ -42,6 +42,10 @@ export function ItemToken({ item }: ItemTokenProps) {
     <div
       className={"bg-white shadow-sm rounded py-2 px-3 font-bold text-xs "+itemDef.color}
     >
+      <span className="material-symbols-rounded font-normal text-xs mr-1">
+        {itemDef.icon}
+      </span>
+
       {itemDef.getTitle(item.value)}
     </div>
   )

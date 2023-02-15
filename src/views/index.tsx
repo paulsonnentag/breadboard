@@ -9,6 +9,7 @@ export interface ViewDefinition {
 
   displayName: string
   color: string
+  icon: string
 }
 
 export const ViewDefinitions = {
@@ -31,7 +32,12 @@ export function ViewFrame({ view, items, updateItems }: ViewFrameProps) {
   return (
     <div className="rounded-xl shadow-xl bg-white overflow-hidden h-full flex flex-col">
       <div className="p-4">
-        <span className={"font-bold " + viewDef.color}>{viewDef.displayName}</span>
+        <p className={"font-bold " + viewDef.color}>
+          <span className="material-symbols-rounded text-base font-normal mr-1">
+            {viewDef.icon}
+          </span>
+          {viewDef.displayName}
+        </p>
       </div>
       <hr className="" />
       <ViewRenderer viewDef={viewDef} items={items} updateItems={updateItems} />

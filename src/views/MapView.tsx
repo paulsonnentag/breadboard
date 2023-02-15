@@ -13,6 +13,7 @@ export const MapViewDefinition: ViewDefinition = {
   inputs: ["geolocation"],
   displayName: "Map",
   color: "text-green-700",
+  icon: "map",
 }
 
 export const MapView = ({ items, updateItems }: ItemViewProps) => {

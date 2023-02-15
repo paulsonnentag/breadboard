@@ -6,7 +6,7 @@ export interface ForecastItem {
 
 export const ForecastItemDefinition: ItemDefinition = {
   type: "forecast",
-  icon: "",
+  icon: "clear_day",
   color: "text-yellow-500",
 
   getTitle: (value:any) => {

@@ -9,3 +9,12 @@ body {
 .bg-alt {
   background: #E1E5EB;
 }
+
+.material-symbols-rounded {
+  vertical-align: bottom;
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}

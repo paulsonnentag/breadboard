@@ -1,6 +1,9 @@
 import { ItemToken } from "./items"
 import { Path, View } from "./store"
 import { UpdateItemsFn, ViewFrame } from "./views"
+import { CalendarViewDefinition } from "./views/CalendarView"
+import { MapViewDefinition } from "./views/MapView"
+import { WeatherViewDefinition } from "./views/WeatherView"
 
 interface PathViewProps {
   path: Path
@@ -54,18 +57,22 @@ function EndOfPathView(props:EndOfPathViewProps) {
   return (
     <div className="flex flex-col gap-2 items-center">
       <LittleSearchButton />
-      <LittleQuickButton icon="M" color="text-green-600" onClick={() => { props.createView("map") }} />
-      <LittleQuickButton icon="P" color="text-lime-500" onClick={() => { props.createView("places") }} />
-      <LittleQuickButton icon="W" color="text-yellow-500" onClick={() => { props.createView("weather") }} />
-      <LittleQuickButton icon="C" color="text-red-500" onClick={() => { props.createView("calendar") }} />
+      <LittleQuickButton icon={MapViewDefinition.icon} color="text-green-600" onClick={() => { props.createView("map") }} />
+      <LittleQuickButton icon="distance" color="text-lime-500" onClick={() => { props.createView("places") }} />
+      <LittleQuickButton icon={WeatherViewDefinition.icon} color="text-yellow-500" onClick={() => { props.createView("weather") }} />
+      <LittleQuickButton icon={CalendarViewDefinition.icon} color="text-red-500" onClick={() => { props.createView("calendar") }} />
     </div>
   )
 }
 
 function LittleSearchButton() {
   return (
-    <button className="bg-white shadow-sm rounded-full h-12 w-12 font-bold text-gray-400"
-    >S</button>
+    <button className="bg-white shadow-sm rounded-full h-12 w-12"
+    >
+      <span className="material-symbols-rounded text-xl font-normal text-gray-400">
+        search
+      </span>
+    </button>
   )
 }
 
@@ -78,10 +85,12 @@ interface LittleQuickButtonProps {
 function LittleQuickButton(props:LittleQuickButtonProps) {
   return (
     <button 
-      className={props.color + " bg-white shadow-sm rounded-md w-12 h-10 text-sm font-bold"}
+      className={props.color + " bg-white shadow-sm rounded-md w-12 h-10"}
       onClick={props.onClick}
     >
-      {props.icon}
+      <span className="material-symbols-rounded text-base font-normal">
+        {props.icon}
+      </span>
     </button>
   )
 }
@@ -102,10 +111,10 @@ function EmptyPathView(props:EmptyPathViewProps) {
       <div
         className="flex justify-center pt-5 gap-2"
       >
-        <QuickButton icon="" title="Map" color="text-green-600" onClick={() => { props.createView("map") }} />
-        <QuickButton icon="" title="Places" color="text-lime-500" onClick={() => { props.createView("places") }} />
-        <QuickButton icon="" title="Weather" color="text-yellow-500" onClick={() => { props.createView("weather") }} />
-        <QuickButton icon="" title="Calendar" color="text-red-500" onClick={() => { props.createView("calendar") }} />
+        <QuickButton icon={MapViewDefinition.icon} title="Map" color="text-green-600" onClick={() => { props.createView("map") }} />
+        <QuickButton icon="distance" title="Places" color="text-lime-500" onClick={() => { props.createView("places") }} />
+        <QuickButton icon={WeatherViewDefinition.icon} title="Weather" color="text-yellow-500" onClick={() => { props.createView("weather") }} />
+        <QuickButton icon={CalendarViewDefinition.icon} title="Calendar" color="text-red-500" onClick={() => { props.createView("calendar") }} />
       </div>
     </div>
   )
@@ -124,6 +133,10 @@ function QuickButton(props:QuickButtonProps) {
       className={props.color + " bg-white shadow-sm rounded-md px-4 py-2 text-sm font-bold"}
       onClick={props.onClick}
     >
+      <span className="material-symbols-rounded text-base font-normal mr-1 relative top-[1px]">
+        {props.icon}
+      </span>
+
       {props.title}
     </button>
   )
