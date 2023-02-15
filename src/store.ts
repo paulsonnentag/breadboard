@@ -50,10 +50,6 @@ export function useStore(documentId: DocumentId) {
   state = injectProviderValues(useCurrentLocationProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
   state = injectProviderValues(useWeatherProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
 
-  // A more idiomatic API for providers would look like:
-  // function provideCurrentDate(item: Item, itemsInScope: Item[], hasUpdates: () => void) { }
-  // Where the fn is called per item and only supplies an item value if that provider can.
-
   const actions = {
     addPath: () => {
       updateDoc(doc => {
