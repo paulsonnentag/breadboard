@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DateItem } from "../items/DateItem";
 import { ForecastItem } from "../items/ForecastItem";
 import { LocationItem } from "../items/LocationItem";
@@ -13,19 +13,21 @@ let fetchedForecasts: {[latLong: string]: any} = {}
 
 export function useWeatherProvider(paths: Item[][]) {
   const [values, setValues] = useState({} as { [id: string]: ForecastItem })
-  let toFetch: {[id: string]: LatLong} = {}
 
-  for (var items of paths) {
-    // Only supporting one location item and one weather view per path atm; can adjust in future.
-    const locItem = items.find(i => i.type === "geolocation" && i.value)
-    const forecastItem = items.find(i => i.type === "forecast")
-
-    if (locItem && forecastItem) {
-      toFetch[forecastItem.id] = locItem.value
-    }
-  }
 
   useEffect(() => {
+    let toFetch: {[id: string]: LatLong} = {}
+
+    for (var items of paths) {
+      // Only supporting one location item and one weather view per path atm; can adjust in future.
+      const locItem = items.find(i => i.type === "geolocation" && i.value)
+      const forecastItem = items.find(i => i.type === "forecast")
+
+      if (locItem && forecastItem && !values[forecastItem.id]) {
+        toFetch[forecastItem.id] = locItem.value
+      }
+    }
+
     // TODO: Also cache dates and re-fetch a forecast after ~1 hour?
 
     for (var id in toFetch) {
@@ -61,14 +63,14 @@ export function useWeatherProvider(paths: Item[][]) {
           fetchedForecasts[`${latLong.lat}::${latLong.long}`] = data
 
           // Could id be out of date in some cases?
-          setValues(forecasts => {
-            forecasts[id] = { forecast: data } as ForecastItem
-            return forecasts
-          })
+          setValues(forecasts => ({
+              ...forecasts,
+              [id] : { forecast: data } as ForecastItem
+          }))
         })
       }
     }
-  }, [toFetch])
+  }, [paths])
 
   return values
 }
