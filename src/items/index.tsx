@@ -10,7 +10,6 @@ export interface ItemDefinition {
   color: string
 
   getTitle: (value:any) => string
-  getDefaultValue?: () => any 
 
   [x: string | number | symbol]: unknown
 }

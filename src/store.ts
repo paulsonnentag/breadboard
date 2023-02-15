@@ -1,11 +1,10 @@
 import { DocumentId, Repo } from "automerge-repo";
 import { useDocument } from "automerge-repo-react-hooks";
-import { useCallback, useEffect, useState } from "react";
-import { ItemDefinitions } from "./items";
-import { LocationItem } from "./items/LocationItem";
 import { useWeatherProvider } from "./providers/WeatherProvider";
 import { ViewDefinitions } from "./views";
 import { v4 } from "uuid";
+import { useCurrentLocationProvider } from "./providers/CurrentLocationProvider";
+import { useCurrentDateProvider } from "./providers/CurrentDateProvider";
 
 export interface Item {
   type: string
@@ -43,69 +42,13 @@ export function createPathBoardDoc(repo: Repo) {
 
 export function useStore(documentId: DocumentId) {
   const [doc, updateDoc] = useDocument<PathBoardDoc>(documentId)
-  const forecasts = useWeatherProvider((doc?.paths || []).map(p => p.items))
-  const geolocation = useGeolocation()
 
-  let state = doc
+  let state = structuredClone(doc)
 
-  if (state && doc) {
-    for (var p = 0; p < state.paths.length; p++) {
-      for (var i = 0; i < state.paths[p].items.length; i++) {
-        if (!doc.paths[p].items[i].value) {
-          // Default value - WIP
-          switch (doc.paths[p].items[i].type) {
-            case "geolocation":
-              if (geolocation.latitude && geolocation.longitude) {
-                const value: LocationItem = {
-                  lat: geolocation.latitude,
-                  long: geolocation.longitude,
-                  title: "Current location",
-                }
-
-                state.paths[p].items[i].value = value
-              }
-              else {
-                // During dev, the browser stops giving the location after many refreshes; giving Denver here
-                const value: LocationItem = {
-                  lat: 39.7392,
-                  long: -104.9903,
-                  title: "Current location",
-                }
-
-                state.paths[p].items[i].value = value
-              }
-
-              break
-
-            default:
-              // Providers
-
-              if (forecasts[doc.paths[p].items[i].id]) {
-                state.paths[p].items[i].value = forecasts[doc.paths[p].items[i].id]
-                break
-              }
-
-              // Defaults
-
-              const itemDef = ItemDefinitions[state.paths[p].items[i].type]
-
-              if (itemDef && itemDef.getDefaultValue) {
-                state.paths[p].items[i].value = itemDef.getDefaultValue()
-              }
-
-              break
-          }
-        } else {
-          // Hydrate
-          try {
-            state.paths[p].items[i].value = JSON.parse(doc.paths[p].items[i].value) // TODO: Can just get the object
-          } catch (e) {
-
-          }
-        }
-      }
-    }
-  }
+  // This imposes a sequence; in reality, we would want no sequence imposed, but this is how hooks have to work. We're using hooks so that providers can issue new values (such as when the current location or date changes).
+  state = injectProviderValues(useCurrentDateProvider((state?.paths || []).map(p => p.items)), state)
+  state = injectProviderValues(useCurrentLocationProvider((state?.paths || []).map(p => p.items)), state)
+  state = injectProviderValues(useWeatherProvider((state?.paths || []).map(p => p.items)), state)
 
   const actions = {
     addPath: () => {
@@ -132,12 +75,12 @@ export function useStore(documentId: DocumentId) {
         }
       })
     },
-    updateItems: (items: Item[], pathId: number) => {
+    updateItems: (items: Item[], pathIndex: number) => {
       console.log("UPDATE ITEMS") // logging to watch for overruns
       updateDoc(doc => {
-        items.forEach((item, itemId) => {
+        items.forEach((item, itemIndex) => {
           try {
-            doc.paths[pathId].items[itemId].value = JSON.stringify(item.value) // TODO: Can just set the object
+            doc.paths[pathIndex].items[itemIndex].value = item.value //JSON.stringify(item.value) // TODO: Can just set the object
           } catch (e) {
 
           }
@@ -153,113 +96,20 @@ export function useStore(documentId: DocumentId) {
   }
 }
 
+function injectProviderValues(values: { [id: string]: any }, state?: PathBoardDoc) {
+  if (!state) {
+    return state
+  }
 
-
-// From https://github.com/bence-toth/react-hook-geolocation/blob/main/src/index.js
-// TODO: Need to add types
-// TODO: This is probably just a provider
-const useGeolocation = (
-  { enableHighAccuracy, maximumAge, timeout } = {},
-  callback,
-  isEnabled = true
-) => {
-  const [coordinates, setCoordinates] = useState({
-    accuracy: null,
-    altitude: null,
-    altitudeAccuracy: null,
-    heading: null,
-    latitude: null,
-    longitude: null,
-    speed: null,
-    timestamp: null,
-    error: null,
-  });
-
-  const updateCoordinates = useCallback(
-    ({ coords, timestamp }) => {
-      const {
-        accuracy,
-        altitude,
-        altitudeAccuracy,
-        heading,
-        latitude,
-        longitude,
-        speed,
-      } = coords;
-
-      setCoordinates({
-        accuracy,
-        altitude,
-        altitudeAccuracy,
-        heading,
-        latitude,
-        longitude,
-        speed,
-        timestamp,
-        error: null,
-      });
-
-      if (typeof callback === "function") {
-        callback({
-          accuracy,
-          altitude,
-          altitudeAccuracy,
-          heading,
-          latitude,
-          longitude,
-          speed,
-          timestamp,
-          error: null,
-        });
+  for (let path of state.paths) {
+    for (let item of path.items) {
+      if (!item.value && values[item.id]) {
+        item.value = values[item.id]
       }
-    },
-    [callback]
-  );
-
-  const setError = useCallback((error:any) => {
-    setCoordinates({
-      accuracy: null,
-      altitude: null,
-      altitudeAccuracy: null,
-      heading: null,
-      latitude: null,
-      longitude: null,
-      speed: null,
-      timestamp: null,
-      error,
-    });
-  }, []);
-
-  useEffect(() => {
-    let watchId: number;
-
-    if (isEnabled && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(updateCoordinates, setError);
-      watchId = navigator.geolocation.watchPosition(
-        updateCoordinates,
-        setError,
-        {
-          enableHighAccuracy,
-          maximumAge,
-          timeout,
-        }
-      );
     }
+  }
 
-    return () => {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
-  }, [
-    isEnabled,
-    callback,
-    enableHighAccuracy,
-    maximumAge,
-    setError,
-    timeout,
-    updateCoordinates,
-  ]);
+  return state
+}
 
-  return coordinates;
-};
+

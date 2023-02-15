@@ -26,10 +26,4 @@ export const DateItemDefinition: ItemDefinition = {
       return "Unknown date"
     }
   },
-
-  getDefaultValue: () => {
-    return {
-      date: new Date().getTime(),
-    } as DateItem
-  },
 }

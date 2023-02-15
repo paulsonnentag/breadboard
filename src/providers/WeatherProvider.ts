@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DateItem } from "../items/DateItem";
 import { ForecastItem } from "../items/ForecastItem";
 import { LocationItem } from "../items/LocationItem";
@@ -12,8 +12,7 @@ interface LatLong {
 let fetchedForecasts: {[latLong: string]: any} = {}
 
 export function useWeatherProvider(paths: Item[][]) {
-  const [forecasts, setForecasts] = useState({} as { [id: string]: ForecastItem })
-
+  const [values, setValues] = useState({} as { [id: string]: ForecastItem })
   let toFetch: {[id: string]: LatLong} = {}
 
   for (var items of paths) {
@@ -36,16 +35,18 @@ export function useWeatherProvider(paths: Item[][]) {
         continue
       }
 
-      if (forecasts[id]) {
+      if (values[id]) {
         continue
       }
 
       if (fetchedForecasts[`${latLong.lat}::${latLong.long}`]) {
         // It exists or is loading already
-        setForecasts(forecasts => {
-          forecasts[id] = { forecast: fetchedForecasts[`${latLong.lat}::${latLong.long}`] } as ForecastItem
-          return forecasts
-        })
+        if (fetchedForecasts[`${latLong.lat}::${latLong.long}`] !== "loading") {
+          setValues(forecasts => {
+            forecasts[id] = { forecast: fetchedForecasts[`${latLong.lat}::${latLong.long}`] } as ForecastItem
+            return forecasts
+          })
+        }
       }
       else {
         // Need to load
@@ -60,7 +61,7 @@ export function useWeatherProvider(paths: Item[][]) {
           fetchedForecasts[`${latLong.lat}::${latLong.long}`] = data
 
           // Could id be out of date in some cases?
-          setForecasts(forecasts => {
+          setValues(forecasts => {
             forecasts[id] = { forecast: data } as ForecastItem
             return forecasts
           })
@@ -69,5 +70,5 @@ export function useWeatherProvider(paths: Item[][]) {
     }
   }, [toFetch])
 
-  return forecasts
+  return values
 }
