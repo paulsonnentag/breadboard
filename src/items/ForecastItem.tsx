@@ -1,7 +1,7 @@
 import { ItemDefinition } from "."
 
 export interface ForecastItem {
-  forecast: string
+  forecast: any
 }
 
 export const ForecastItemDefinition: ItemDefinition = {

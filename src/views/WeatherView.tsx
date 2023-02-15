@@ -3,6 +3,7 @@ import { startOfToday, addHours, addDays, addMonths, getTime } from "date-fns"
 import { Item } from "../store"
 import { useMemo } from "react"
 import { DateItem } from "../items/DateItem"
+import { ForecastItem } from "../items/ForecastItem"
 
 export const WeatherViewDefinition: ViewDefinition = {
   name: "weather",
@@ -13,7 +14,7 @@ export const WeatherViewDefinition: ViewDefinition = {
 
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.
 export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
-  let location = items.find((i) => i.type == "geolocation")
+  let forecast = items.find((i) => i.type == "forecast")?.value as ForecastItem
   let dateItem = items.find((i) => i.type === "date")
 
   const currentDate = dateItem!.value.date
@@ -41,6 +42,12 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
 
   return (
     <div className="p-4">
+      {!forecast && 
+        <h1 className="text-gray-400">Loading...</h1>
+      }
+      {forecast && 
+        <h1>Weather!</h1>
+      }
       <div>
         <input
           className="w-full"

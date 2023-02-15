@@ -3,11 +3,14 @@ import { useDocument } from "automerge-repo-react-hooks";
 import { useCallback, useEffect, useState } from "react";
 import { ItemDefinitions } from "./items";
 import { LocationItem } from "./items/LocationItem";
+import { useWeatherProvider } from "./providers/WeatherProvider";
 import { ViewDefinitions } from "./views";
+import { v4 } from "uuid";
 
 export interface Item {
   type: string
   value?: any
+  id: string
   
   params?: any 
 }
@@ -40,6 +43,7 @@ export function createPathBoardDoc(repo: Repo) {
 
 export function useStore(documentId: DocumentId) {
   const [doc, updateDoc] = useDocument<PathBoardDoc>(documentId)
+  const forecasts = useWeatherProvider((doc?.paths || []).map(p => p.items))
   const geolocation = useGeolocation()
 
   let state = doc
@@ -51,16 +55,38 @@ export function useStore(documentId: DocumentId) {
           // Default value - WIP
           switch (doc.paths[p].items[i].type) {
             case "geolocation":
-              const value: LocationItem = {
-                lat: geolocation.latitude,
-                long: geolocation.longitude,
-                title: "Current location",
+              if (geolocation.latitude && geolocation.longitude) {
+                const value: LocationItem = {
+                  lat: geolocation.latitude,
+                  long: geolocation.longitude,
+                  title: "Current location",
+                }
+
+                state.paths[p].items[i].value = value
+              }
+              else {
+                // During dev, the browser stops giving the location after many refreshes; giving Denver here
+                const value: LocationItem = {
+                  lat: 39.7392,
+                  long: -104.9903,
+                  title: "Current location",
+                }
+
+                state.paths[p].items[i].value = value
               }
 
-              state.paths[p].items[i].value = value
-
               break
+
             default:
+              // Providers
+
+              if (forecasts[doc.paths[p].items[i].id]) {
+                state.paths[p].items[i].value = forecasts[doc.paths[p].items[i].id]
+                break
+              }
+
+              // Defaults
+
               const itemDef = ItemDefinitions[state.paths[p].items[i].type]
 
               if (itemDef && itemDef.getDefaultValue) {
@@ -72,7 +98,7 @@ export function useStore(documentId: DocumentId) {
         } else {
           // Hydrate
           try {
-            state.paths[p].items[i].value = JSON.parse(doc.paths[p].items[i].value)
+            state.paths[p].items[i].value = JSON.parse(doc.paths[p].items[i].value) // TODO: Can just get the object
           } catch (e) {
 
           }
@@ -101,7 +127,7 @@ export function useStore(documentId: DocumentId) {
 
           for (const input of inputs) {
             if (!doc.paths[pathId].items.find(i => i.type === input))
-            doc.paths[pathId].items.push({ type: input })
+            doc.paths[pathId].items.push({ type: input, id: v4() })
           }
         }
       })
@@ -111,7 +137,7 @@ export function useStore(documentId: DocumentId) {
       updateDoc(doc => {
         items.forEach((item, itemId) => {
           try {
-            doc.paths[pathId].items[itemId].value = JSON.stringify(item.value)
+            doc.paths[pathId].items[itemId].value = JSON.stringify(item.value) // TODO: Can just set the object
           } catch (e) {
 
           }
