@@ -10,12 +10,16 @@ export const DateItemDefinition: ItemDefinition = {
   icon: "",
   color: "text-red-500",
 
-  getTitle: (value:any) => {
+  getTitle: (value: any) => {
     const v = value as DateItem
 
     if (v) {
       const date = new Date(v.date)
-      const formattedDate = date.toLocaleDateString('en-US', { weekday: "short", month: "short", day: "numeric" })
+      const formattedDate = date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
 
       return formattedDate
     } else {
@@ -25,7 +29,7 @@ export const DateItemDefinition: ItemDefinition = {
 
   getDefaultValue: () => {
     return {
-      date: (new Date()).getTime()
+      date: new Date().getTime(),
     } as DateItem
-  }
+  },
 }
