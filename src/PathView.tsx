@@ -133,11 +133,13 @@ function QuickButton(props:QuickButtonProps) {
       className={props.color + " bg-white shadow-sm rounded-md px-4 py-2 text-sm font-bold"}
       onClick={props.onClick}
     >
-      <span className="material-symbols-rounded text-base font-normal mr-1 relative top-[1px]">
-        {props.icon}
+      
+        <span className="material-symbols-rounded text-base font-normal mr-1">
+          {props.icon}
+        </span>
+      <span className="align-text-bottom">
+        {props.title}
       </span>
-
-      {props.title}
     </button>
   )
 }
