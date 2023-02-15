@@ -22,7 +22,8 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
     lng: -104.9903,
   }
 
-  let locationItemValue: LocationItem = items.find((i) => i.type == "geolocation")?.value
+  let locationItem = items.find((i) => i.type == "geolocation")
+  let locationItemValue: LocationItem = locationItem?.value
   if (locationItemValue && locationItemValue.lat && locationItemValue.long) {
     locationValue.lat = locationItemValue.lat
     locationValue.lng = locationItemValue.long
@@ -79,19 +80,17 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
 
           let biggestContainedResult = getBiggestContainedResult(mapBounds, results)
 
-          updateItems(items => {
+          if (locationItem) {
             const newItemValue: LocationItem = {
               lat: center.lat(),
               long: center.lng(),
               title: biggestContainedResult.formatted_address
             }
 
-            const item = items.find(i => i.type === "geolocation")
+            locationItem.value = newItemValue
 
-            if (item) {
-              item.value = newItemValue
-            }
-          })
+            updateItems([locationItem])
+          }
         })
       }
     }, 500)

@@ -14,7 +14,6 @@ let fetchedForecasts: {[latLong: string]: any} = {}
 export function useWeatherProvider(paths: Item[][]) {
   const [values, setValues] = useState({} as { [id: string]: ForecastItem })
 
-
   useEffect(() => {
     let toFetch: {[id: string]: LatLong} = {}
 
@@ -23,7 +22,7 @@ export function useWeatherProvider(paths: Item[][]) {
       const locItem = items.find(i => i.type === "geolocation" && i.value)
       const forecastItem = items.find(i => i.type === "forecast")
 
-      if (locItem && forecastItem && !values[forecastItem.id]) {
+      if (locItem && forecastItem && !forecastItem.value) {
         toFetch[forecastItem.id] = locItem.value
       }
     }
@@ -34,10 +33,6 @@ export function useWeatherProvider(paths: Item[][]) {
       const latLong = toFetch[id]
 
       if (!latLong.lat || !latLong.long) {
-        continue
-      }
-
-      if (values[id]) {
         continue
       }
 
@@ -53,6 +48,11 @@ export function useWeatherProvider(paths: Item[][]) {
       else {
         // Need to load
         fetchedForecasts[`${latLong.lat}::${latLong.long}`] = "loading"
+
+        setValues(forecasts => ({
+          ...forecasts,
+          [id] : { forecast: undefined } as ForecastItem
+        }))
 
         // for documentation see https://open-meteo.com/en/docs
         fetch(

@@ -26,7 +26,7 @@ const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000 - 1
 
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.
 export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
-  let forecast = items.find((i) => i.type == "forecast")?.value as ForecastItem
+  let forecast = (items.find((i) => i.type == "forecast")?.value as ForecastItem)?.forecast
   let dateItem = items.find((i) => i.type === "date")
 
   const dateOptions = useMemo(() => {
@@ -55,18 +55,17 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
   )
 
   const onChangeDateOption = (index: number) => {
-    updateItems((items) => {
-      const dateItem = items.find((i) => i.type === "date")
-      if (dateItem) {
-        dateItem.value = dateOptions[index]
-      }
-    })
+    if (dateItem) {
+      dateItem.value = dateOptions[index]
+      updateItems([dateItem])
+    }
   }
 
   return (
     <div className="p-4">
       {!forecast && <h1 className="text-gray-400">Loading...</h1>}
       {forecast && <h1>Weather!</h1>}
+      {forecast && forecast.latitude} {forecast && forecast.longitude}
       <div>
         <input
           className="w-full"

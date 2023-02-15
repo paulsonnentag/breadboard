@@ -20,10 +20,7 @@ export function PathBoardView({ documentId }: PathBoardViewProps) {
           <PathView
             path={path}
             addView={view => actions.addView(view, index)}
-            updateItems={(fn) => {
-              fn(path.items)
-              actions.updateItems(path.items, index)}
-            }
+            updateItems={i => actions.updateItems(i, index)}
           />
         </div>
       ))}

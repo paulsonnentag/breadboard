@@ -18,7 +18,7 @@ export const ViewDefinitions = {
   [CalendarViewDefinition.name]: CalendarViewDefinition,
 }
 
-export type UpdateItemsFn = (fn: (items: Item[]) => void) => void
+export type UpdateItemsFn = (items: Item[]) => void
 
 interface ViewFrameProps {
   view: View

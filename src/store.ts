@@ -46,9 +46,13 @@ export function useStore(documentId: DocumentId) {
   let state = structuredClone(doc)
 
   // This imposes a sequence; in reality, we would want no sequence imposed, but this is how hooks have to work. We're using hooks so that providers can issue new values (such as when the current location or date changes).
-  state = injectProviderValues(useCurrentDateProvider((state?.paths || []).map(p => p.items)), state)
-  state = injectProviderValues(useCurrentLocationProvider((state?.paths || []).map(p => p.items)), state)
-  state = injectProviderValues(useWeatherProvider((state?.paths || []).map(p => p.items)), state)
+  state = injectProviderValues(useCurrentDateProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
+  state = injectProviderValues(useCurrentLocationProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
+  state = injectProviderValues(useWeatherProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
+
+  // A more idiomatic API for providers would look like:
+  // function provideCurrentDate(item: Item, itemsInScope: Item[], hasUpdates: () => void) { }
+  // Where the fn is called per item and only supplies an item value if that provider can.
 
   const actions = {
     addPath: () => {
@@ -59,6 +63,7 @@ export function useStore(documentId: DocumentId) {
         })
       })
     },
+    
     addView: (view: View, pathId: number) => {
       updateDoc(doc => {
         doc.paths[pathId].views.push(view)
@@ -75,15 +80,13 @@ export function useStore(documentId: DocumentId) {
         }
       })
     },
+
+    // NOTE: Don't pass items you want providers to continue updating 
     updateItems: (items: Item[], pathIndex: number) => {
       console.log("UPDATE ITEMS") // logging to watch for overruns
       updateDoc(doc => {
         items.forEach((item, itemIndex) => {
-          try {
-            doc.paths[pathIndex].items[itemIndex].value = item.value //JSON.stringify(item.value) // TODO: Can just set the object
-          } catch (e) {
-
-          }
+          doc.paths[pathIndex].items[itemIndex].value = item.value
         })
       })
     },
