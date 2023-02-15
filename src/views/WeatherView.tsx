@@ -48,7 +48,10 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
     return options
   }, [])
 
-  const selectedDateOptionIndex = getSelectedOptionIndex(dateItem!.value.date, dateOptions)
+  const selectedDateOptionIndex = getSelectedOptionIndex(
+    dateItem!.value.date + (dateItem!.value.duration ?? 0),
+    dateOptions
+  )
 
   const onChangeDateOption = (index: number) => {
     updateItems((items) => {
