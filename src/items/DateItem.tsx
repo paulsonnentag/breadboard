@@ -2,7 +2,7 @@ import { ItemDefinition } from "."
 
 export interface DateItem {
   date: number
-  duration?: number
+  duration?: number // in ms
 }
 
 export const DateItemDefinition: ItemDefinition = {
