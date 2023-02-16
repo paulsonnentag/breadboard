@@ -38,22 +38,6 @@ export function WeatherWidgetView({
   const day = moment().startOf("day")
   const currentHour = moment().startOf("hour")
 
-  const predictions: Prediction[] = weatherData
-    ? weatherData.hourly.time
-        .map((time: number, index: number) => {
-          return {
-            timestamp: moment(time * 1000),
-            description: getWeatherDescription(weatherData.hourly.weathercode[index]),
-            temperature: weatherData.hourly.temperature_2m[index],
-          }
-        })
-        .filter(({ timestamp }: Prediction) =>
-          timestamp.clone().subtract({ minute: 1 }).startOf("day").isSame(day)
-        )
-    : []
-
-  const currentPrediction = predictions.find(({ timestamp }) => timestamp.isSame(currentHour))
-
   useEffect(() => {
     if (!selectedLocation) {
       return

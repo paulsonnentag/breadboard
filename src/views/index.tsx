@@ -30,7 +30,7 @@ export function ViewFrame({ view, items, updateItems }: ViewFrameProps) {
   const viewDef = ViewDefinitions[view.name]
 
   return (
-    <div className="rounded-xl shadow-xl bg-white overflow-hidden h-full flex flex-col">
+    <div className="rounded-xl shadow-xl bg-white overflow-hidden h-full flex flex-col" >
       <div className="p-4">
         <p className={"font-bold " + viewDef.color}>
           <span className="material-symbols-rounded text-base font-normal mr-1">
