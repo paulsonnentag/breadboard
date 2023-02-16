@@ -20,14 +20,12 @@ export function useWeatherProvider(paths: Item[][]) {
     for (var items of paths) {
       // Only supporting one location item and one weather view per path atm; can adjust in future.
       const locItem = items.find(i => i.type === "geolocation" && i.value)
-      const forecastItem = items.find(i => i.type === "forecast")
+      const poiResultItem = items.find(i => i.type === "poiResults")
 
-      if (locItem && forecastItem && !forecastItem.value) {
-        toFetch[forecastItem.id] = locItem.value
+      if (locItem && poiResultItem && !poiResultItem.value) {
+        toFetch[poiResultItem.id] = locItem.value
       }
     }
-
-    // TODO: Also cache dates and re-fetch a forecast after ~1 hour?
 
     for (var id in toFetch) {
       const latLong = toFetch[id]
@@ -39,10 +37,10 @@ export function useWeatherProvider(paths: Item[][]) {
       if (fetchedForecasts[`${latLong.lat}::${latLong.long}`]) {
         // It exists or is loading already
         if (fetchedForecasts[`${latLong.lat}::${latLong.long}`] !== "loading") {
-          setValues(forecasts => {
-            forecasts[id] = { forecast: fetchedForecasts[`${latLong.lat}::${latLong.long}`] } as ForecastItem
-            return forecasts
-          })
+          setValues(forecasts => ({
+            ...forecasts,
+            [id]: { forecast: fetchedForecasts[`${latLong.lat}::${latLong.long}`] } as ForecastItem
+          }))
         }
       }
       else {

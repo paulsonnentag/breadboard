@@ -2,6 +2,7 @@ import { Item, View } from "../store"
 import { MapView, MapViewDefinition } from "./MapView"
 import { WeatherView, WeatherViewDefinition } from "./WeatherView"
 import { CalendarView, CalendarViewDefinition } from "./CalendarView"
+import { PoiFinderView, PoiFinderViewDefinition } from "./PoiFinderView";
 
 export interface ViewDefinition {
   name: string
@@ -16,6 +17,7 @@ export const ViewDefinitions = {
   [MapViewDefinition.name]: MapViewDefinition,
   [WeatherViewDefinition.name]: WeatherViewDefinition,
   [CalendarViewDefinition.name]: CalendarViewDefinition,
+  [PoiFinderViewDefinition.name]: PoiFinderViewDefinition
 }
 
 export type UpdateItemsFn = (items: Item[]) => void
@@ -61,6 +63,9 @@ export function ViewRenderer({ viewDef, items, updateItems }: ViewRendererProps)
 
     case "calendar":
       return <CalendarView items={items} updateItems={updateItems} />
+
+    case "poiFinder":
+      return <PoiFinderView items={items} updateItems={updateItems} />
 
     default:
       return <span>not implemented {viewDef.name}</span>

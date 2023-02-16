@@ -5,6 +5,7 @@ import { ViewDefinitions } from "./views";
 import { v4 } from "uuid";
 import { useCurrentLocationProvider } from "./providers/CurrentLocationProvider";
 import { useCurrentDateProvider } from "./providers/CurrentDateProvider";
+import { usePoiResultSetProvider } from "./providers/PoiResultSetProvider";
 
 export interface Item {
   type: string
@@ -49,6 +50,7 @@ export function useStore(documentId: DocumentId) {
   state = injectProviderValues(useCurrentDateProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
   state = injectProviderValues(useCurrentLocationProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
   state = injectProviderValues(useWeatherProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
+  state = injectProviderValues(usePoiResultSetProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
 
   const actions = {
     addPath: () => {

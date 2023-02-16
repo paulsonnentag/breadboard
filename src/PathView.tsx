@@ -4,6 +4,7 @@ import { UpdateItemsFn, ViewFrame } from "./views"
 import { CalendarViewDefinition } from "./views/CalendarView"
 import { MapViewDefinition } from "./views/MapView"
 import { WeatherViewDefinition } from "./views/WeatherView"
+import { PoiFinderViewDefinition } from "./views/PoiFinderView";
 
 interface PathViewProps {
   path: Path
@@ -61,7 +62,7 @@ function EndOfPathView(props:EndOfPathViewProps) {
       <LittleSearchButton />
       <div className="h-2"></div>
       <LittleQuickButton icon={MapViewDefinition.icon} color="text-green-600" onClick={() => { props.createView("map") }} />
-      <LittleQuickButton icon="distance" color="text-lime-500" onClick={() => { props.createView("places") }} />
+      <LittleQuickButton icon={PoiFinderViewDefinition.icon} color="text-lime-500" onClick={() => { props.createView("poiFinder") }} />
       <LittleQuickButton icon={WeatherViewDefinition.icon} color="text-yellow-500" onClick={() => { props.createView("weather") }} />
       <LittleQuickButton icon={CalendarViewDefinition.icon} color="text-red-500" onClick={() => { props.createView("calendar") }} />
     </div>
