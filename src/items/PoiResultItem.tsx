@@ -1,10 +1,6 @@
 import { ItemDefinition } from "."
 import LatLngLiteral = google.maps.LatLngLiteral;
 
-export interface PoiResultSetItem {
-  results: PoiResultItem[] | undefined
-}
-
 export interface PoiResultItem {
   id: string
   name: string
@@ -16,20 +12,14 @@ export interface PoiResultItem {
   phoneNumber?: string
 }
 
-export const PoiResultSetItemDefinition: ItemDefinition = {
-  type: "poiResultSet",
+export const PoiResultItemDefinition: ItemDefinition = {
+  type: "poiResult",
   icon: "distance",
-  color: "text-lime-800",
+  color: "text-lime-500",
 
   getTitle: (value:any) => {
-    const poiResultSetItem = value as PoiResultSetItem
+    const poiResultItem = value as PoiResultItem
 
-    if (!poiResultSetItem.results) {
-      return "...loading"
-    }
-
-    const count = poiResultSetItem.results?.length
-
-    return `${count} Campground ${count !== 1 ? "s" : ""}`
+    return poiResultItem.name
   }
 }

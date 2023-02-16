@@ -9,7 +9,7 @@ import GeocoderResult = google.maps.GeocoderResult
 import { LocationItem } from "../items/LocationItem"
 import MapsEventListener = google.maps.MapsEventListener;
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView;
-import { PoiResultItem } from "../items/PoiResultItem";
+import { PoiResultItemSet } from "../items/PoiResultItemSet";
 
 export const MapViewDefinition: ViewDefinition = {
   name: "map",
@@ -151,7 +151,7 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
     }
 
     for (let i = 0; i < results.length; i++) {
-      const poiResult : PoiResultItem = results[i]
+      const poiResult : PoiResultItemSet = results[i]
       let mapsMarker = prevMarkers[i] // reuse existing markers, if it already exists
 
       if (!mapsMarker) {

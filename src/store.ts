@@ -53,12 +53,12 @@ export function useStore(documentId: DocumentId) {
   state = injectProviderValues(usePoiResultSetProvider(structuredClone((state?.paths || []).map(p => p.items))), state)
 
   const actions = {
-    addPath: () => {
+    addPath: (path: Path = {
+      items: [],
+      views: [],
+    }) => {
       updateDoc(doc => {
-        doc.paths.push({
-          items: [],
-          views: [],
-        })
+        doc.paths.push(path)
       })
     },
     

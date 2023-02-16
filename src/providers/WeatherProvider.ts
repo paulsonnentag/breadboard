@@ -12,7 +12,7 @@ interface LatLong {
 let fetchedForecasts: {[latLong: string]: any} = {}
 
 export function useWeatherProvider(paths: Item[][]) {
-  const [values, setValues] = useState({} as { [id: string]: ForecastItem })
+  const [values, setValues] = useState(fetchedForecasts as { [id: string]: ForecastItem })
 
   useEffect(() => {
     let toFetch: {[id: string]: LatLong} = {}
@@ -20,14 +20,15 @@ export function useWeatherProvider(paths: Item[][]) {
     for (var items of paths) {
       // Only supporting one location item and one weather view per path atm; can adjust in future.
       const locItem = items.find(i => i.type === "geolocation" && i.value)
-      const poiResultItem = items.find(i => i.type === "poiResults")
+      const forecast = items.find(i => i.type === "forecast")
 
-      if (locItem && poiResultItem && !poiResultItem.value) {
-        toFetch[poiResultItem.id] = locItem.value
+
+      if (locItem && forecast && !forecast.value && !values[forecast.id]) {
+        toFetch[forecast.id] = locItem.value
       }
     }
 
-    for (var id in toFetch) {
+    for (const id in toFetch) {
       const latLong = toFetch[id]
 
       if (!latLong.lat || !latLong.long) {
@@ -44,6 +45,7 @@ export function useWeatherProvider(paths: Item[][]) {
         }
       }
       else {
+
         // Need to load
         fetchedForecasts[`${latLong.lat}::${latLong.long}`] = "loading"
 
@@ -51,6 +53,7 @@ export function useWeatherProvider(paths: Item[][]) {
           ...forecasts,
           [id] : { forecast: undefined } as ForecastItem
         }))
+
 
         // for documentation see https://open-meteo.com/en/docs
         fetch(
@@ -60,12 +63,16 @@ export function useWeatherProvider(paths: Item[][]) {
         .then((data) => {
           fetchedForecasts[`${latLong.lat}::${latLong.long}`] = data
 
+          console.log('fetch weather data')
+
           // Could id be out of date in some cases?
           setValues(forecasts => ({
               ...forecasts,
               [id] : { forecast: data } as ForecastItem
           }))
         })
+
+
       }
     }
   }, [Math.random()]) // this is really aweful but it works

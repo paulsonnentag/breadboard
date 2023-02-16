@@ -2,7 +2,8 @@ import { Item } from "../store"
 import { DateItemDefinition } from "./DateItem"
 import { ForecastItemDefinition } from "./ForecastItem"
 import { LocationItemDefinition } from "./LocationItem"
-import { PoiResultSetItemDefinition } from "./PoiResultItem";
+import { PoiResultSetItemDefinition } from "./PoiResultItemSet";
+import { PoiResultItemDefinition } from "./PoiResultItem";
 
 export interface ItemDefinition {
   type: string
@@ -19,7 +20,8 @@ export const ItemDefinitions = {
   [DateItemDefinition.type]: DateItemDefinition,
   [ForecastItemDefinition.type]: ForecastItemDefinition,
   [LocationItemDefinition.type]: LocationItemDefinition,
-  [PoiResultSetItemDefinition.type]: PoiResultSetItemDefinition
+  [PoiResultSetItemDefinition.type]: PoiResultSetItemDefinition,
+  [PoiResultItemDefinition.type]: PoiResultItemDefinition
 }
 
 

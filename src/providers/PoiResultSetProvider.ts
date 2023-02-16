@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ForecastItem } from "../items/ForecastItem";
 import { Item } from "../store";
-import { PoiResultItem, PoiResultSetItem } from "../items/PoiResultItem";
+import { PoiResultSetItem } from "../items/PoiResultItemSet";
 import PlaceResult = google.maps.places.PlaceResult;
 import { uuid } from "@automerge/automerge";
 import LatLng = google.maps.LatLng;
+import { PoiResultItem } from "../items/PoiResultItem";
 
 interface LatLong {
   lat: number 
@@ -142,7 +143,6 @@ async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetI
         })
       )
 
-
       const pois: PoiResultItem[] = detailedResults.flatMap(
         (detailedResult: PlaceResult | null) => {
           if (!detailedResult) {
@@ -162,8 +162,6 @@ async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetI
           if (!name || !geometry?.location) {
             return []
           }
-
-          console.log(detailedResult, formatted_address)
 
           const poi: PoiResultItem = {
             id: uuid(),

@@ -9,10 +9,13 @@ import { PoiFinderViewDefinition } from "./views/PoiFinderView";
 interface PathViewProps {
   path: Path
   addView: (view: View) => void
-  updateItems: UpdateItemsFn
+  updateItems: UpdateItemsFn,
+  onCreateNewPath: (path: Path) => void
 }
 
-export function PathView({ path, addView, updateItems }: PathViewProps) {
+export function PathView({ path, addView, updateItems, onCreateNewPath }: PathViewProps) {
+  const items = path.items
+
   return (
     <div
       className="w-full"
@@ -26,8 +29,8 @@ export function PathView({ path, addView, updateItems }: PathViewProps) {
         <div
           className="flex items-center gap-2 mb-2 p-8 pb-0"
         >
-          {path.items.map((item, index) => (
-            <ItemToken item={item} key={index} items={path.items} />
+          {items.map((item, index) => (
+            <ItemToken item={item} key={index} items={items} />
           ))}
 
           <p
@@ -37,7 +40,7 @@ export function PathView({ path, addView, updateItems }: PathViewProps) {
         <div className="flex gap-2 overflow-auto p-8 pt-2">
           {path.views.map((view, index) => (
             <div className="w-[400px] h-[400px] flex-shrink-0" key={index}>
-              <ViewFrame view={view} items={path.items} updateItems={updateItems} />
+              <ViewFrame view={view} items={items} updateItems={updateItems} onCreateNewPath={onCreateNewPath} />
             </div>
           ))}
 

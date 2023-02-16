@@ -21,6 +21,7 @@ export function PathBoardView({ documentId }: PathBoardViewProps) {
             path={path}
             addView={view => actions.addView(view, index)}
             updateItems={i => actions.updateItems(i, index)}
+            onCreateNewPath={path => actions.addPath(path)}
           />
         </div>
       ))}
