@@ -81,7 +81,14 @@ export function useStore(documentId: DocumentId) {
     updateItems: (items: Item[], pathIndex: number) => {
       console.log("UPDATE ITEMS") // logging to watch for overruns
       updateDoc(doc => {
-        items.forEach((item, itemIndex) => {
+        items.forEach((item) => {
+          const path = doc.paths[pathIndex]
+          const itemIndex = path.items.findIndex((otherItem) => otherItem.id === item.id)
+
+          if (itemIndex === -1) {
+            throw new Error('invalid item id')
+          }
+
           doc.paths[pathIndex].items[itemIndex].value = item.value
         })
       })
