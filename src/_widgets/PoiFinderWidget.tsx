@@ -25,30 +25,6 @@ interface PoiFinderViewProps {
   widgetsInScope: Widget[]
 }
 
-const exampleResult = {
-  "formatted_address": "Branderhofer Weg 11, 52066 Aachen, Germany",
-  "formatted_phone_number": "0241 99000991",
-  "geometry": {
-    "location": {
-      "lat": 50.7619433,
-      "lng": 6.1025851
-    },
-    "viewport": {
-      "south": 50.7602359197085,
-      "west": 6.101121719708497,
-      "north": 50.7629338802915,
-      "east": 6.103819680291502
-    }
-  },
-  "name": "Wohnmobil-Stellplatz Bad Aachen",
-  "photos": [
-  ],
-  "rating": 4.5,
-  "website": "http://www.aachen-camping.de/",
-  "html_attributions": []
-}
-
-
 export function PoiFinderWidgetView({
   widget,
   onChange,

@@ -20,11 +20,8 @@ export const PoiFinderView = ({ items, updateItems }: ItemViewProps) => {
 
   const resultSetItem: PoiResultSetItem = poiResultSetItem!.value
 
-
-
   return (
-    <div className="p-4">
-
+    <div className="p-4 flex flex-col gap-2">
       {!resultSetItem.results && "loading ...."}
 
       {resultSetItem.results && resultSetItem.results.map((result, index) => (
@@ -36,6 +33,5 @@ export const PoiFinderView = ({ items, updateItems }: ItemViewProps) => {
         </div>
       ))}
     </div>
-
   )
 }

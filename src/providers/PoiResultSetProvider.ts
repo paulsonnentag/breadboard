@@ -87,7 +87,16 @@ async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetI
         photos: [],
         address: "Branderhofer Weg 11, 52066 Aachen, Germany",
         website : "http://www.aachen-camping.de/"
-      }]
+      },
+        {
+          id: uuid(),
+          name: "Wohnmobil-Stellplatz Bad Aachen",
+          rating : 2.4,
+          latLng: { lat: lat + 0.0001, lng },
+          photos: [],
+          address: "Branderhofer Weg 11, 52066 Aachen, Germany",
+          website : "http://www.aachen-camping.de/"
+        }]
     })
   }
 
