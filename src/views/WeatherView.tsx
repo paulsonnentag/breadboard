@@ -7,7 +7,7 @@ import {
   getTime,
   startOfMonth,
   differenceInMilliseconds,
-  endOfMonth,
+  endOfMonth, format,
 } from "date-fns"
 import { Item } from "../store"
 import { useMemo } from "react"
@@ -28,6 +28,7 @@ const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000 - 1
 export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
   let forecast = (items.find((i) => i.type == "forecast")?.value as ForecastItem)?.forecast
   let dateItem = items.find((i) => i.type === "date")
+
 
   const dateOptions = useMemo(() => {
     const today = getTime(startOfToday())
@@ -56,8 +57,7 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
 
   const onChangeDateOption = (index: number) => {
     if (dateItem) {
-      dateItem.value = dateOptions[index]
-      updateItems([dateItem])
+      updateItems([{...dateItem, value: dateOptions[index]}])
     }
   }
 

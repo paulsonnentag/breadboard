@@ -70,7 +70,7 @@ export function useWeatherProvider(paths: Item[][]) {
         })
       }
     }
-  }, [paths])
+  }, [Math.random()]) // this is really aweful but it works
 
   return values
 }
