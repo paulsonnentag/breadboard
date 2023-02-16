@@ -9,7 +9,7 @@ export interface ItemDefinition {
   icon: string
   color: string
 
-  getTitle: (value:any) => string
+  getTitle: (value:any, items: Item[]) => string
 
   [x: string | number | symbol]: unknown
 }
@@ -23,9 +23,10 @@ export const ItemDefinitions = {
 
 interface ItemTokenProps {
   item: Item
+  items: Item[]
 }
 
-export function ItemToken({ item }: ItemTokenProps) {
+export function ItemToken({ item, items }: ItemTokenProps) {
   const itemDef = ItemDefinitions[item.type]
 
   if (!itemDef) {
@@ -46,7 +47,7 @@ export function ItemToken({ item }: ItemTokenProps) {
         {itemDef.icon}
       </span>
 
-      {item.value && itemDef.getTitle(item.value)}
+      {item.value && itemDef.getTitle(item.value, items)}
       {!item.value && "Loading..."}
     </div>
   )

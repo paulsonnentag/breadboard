@@ -26,7 +26,7 @@ export function PathView({ path, addView, updateItems }: PathViewProps) {
           className="flex items-center gap-2 mb-2 p-8 pb-0"
         >
           {path.items.map((item, index) => (
-            <ItemToken item={item} key={index} />
+            <ItemToken item={item} key={index} items={path.items} />
           ))}
 
           <p

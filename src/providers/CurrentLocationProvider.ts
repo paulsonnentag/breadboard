@@ -3,6 +3,7 @@ import { DateItem } from "../items/DateItem";
 import { ForecastItem } from "../items/ForecastItem";
 import { LocationItem } from "../items/LocationItem";
 import { Item } from "../store";
+import LatLngLiteral = google.maps.LatLngLiteral;
 
 export function useCurrentLocationProvider(paths: Item[][]) {
   let geolocation = useGeolocation()
