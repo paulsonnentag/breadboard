@@ -9,25 +9,25 @@ interface LatLong {
   long: number
 }
 
-let fetchedForecasts: {[latLong: string]: any} = {}
+let fetchedForecasts: {[latLong: string]: ForecastItem | "loading"} = {}
 
 export function useWeatherProvider(paths: Item[][]) {
   const [values, setValues] = useState(fetchedForecasts as { [id: string]: ForecastItem })
 
-  useEffect(() => {
-    let toFetch: {[id: string]: LatLong} = {}
+  let toFetch: {[id: string]: LatLong} = {}
 
-    for (var items of paths) {
-      // Only supporting one location item and one weather view per path atm; can adjust in future.
-      const locItem = items.find(i => i.type === "geolocation" && i.value)
-      const forecast = items.find(i => i.type === "forecast")
+  for (var items of paths) {
+    // Only supporting one location item and one weather view per path atm; can adjust in future.
+    const locItem = items.find(i => i.type === "geolocation" && i.value)
+    const forecast = items.find(i => i.type === "forecast")
 
 
-      if (locItem && forecast && !forecast.value && !values[forecast.id]) {
-        toFetch[forecast.id] = locItem.value
-      }
+    if (locItem && forecast && !forecast.value) {
+      toFetch[forecast.id] = locItem.value
     }
+  }
 
+  useEffect(() => {
     for (const id in toFetch) {
       const latLong = toFetch[id]
 
@@ -35,17 +35,17 @@ export function useWeatherProvider(paths: Item[][]) {
         continue
       }
 
-      if (fetchedForecasts[`${latLong.lat}::${latLong.long}`]) {
+      let fetchedForecast = fetchedForecasts[`${latLong.lat}::${latLong.long}`];
+      if (fetchedForecast) {
         // It exists or is loading already
-        if (fetchedForecasts[`${latLong.lat}::${latLong.long}`] !== "loading") {
+        if (fetchedForecast !== "loading") {
           setValues(forecasts => ({
             ...forecasts,
-            [id]: { forecast: fetchedForecasts[`${latLong.lat}::${latLong.long}`] } as ForecastItem
+            [id]: { forecast: fetchedForecast } as ForecastItem
           }))
         }
       }
       else {
-
         // Need to load
         fetchedForecasts[`${latLong.lat}::${latLong.long}`] = "loading"
 
@@ -75,7 +75,7 @@ export function useWeatherProvider(paths: Item[][]) {
 
       }
     }
-  }, [Math.random()]) // this is really aweful but it works
+  }, [JSON.stringify(toFetch)]) // this is really aweful but it works
 
   return values
 }

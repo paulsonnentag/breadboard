@@ -18,7 +18,6 @@ export function usePoiResultSetProvider(paths: Item[][]) {
   const [values, setValues] = useState({} as { [id: string]: PoiResultSetItem })
 
 
-
   useEffect(() => {
     let toFetch: {[id: string]: LatLong} = {}
 
@@ -74,7 +73,7 @@ export function usePoiResultSetProvider(paths: Item[][]) {
 
 const placesService =  new google.maps.places.PlacesService(document.createElement("div"))
 
-const DISABLE_FETCH = true;
+const DISABLE_FETCH = false;
 
 async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetItem> {
 

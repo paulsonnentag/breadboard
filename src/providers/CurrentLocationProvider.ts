@@ -5,16 +5,18 @@ import { LocationItem } from "../items/LocationItem";
 import { Item } from "../store";
 import LatLngLiteral = google.maps.LatLngLiteral;
 
+const IS_OVERRIDE_ENABLED = true
+
 export function useCurrentLocationProvider(paths: Item[][]) {
   let geolocation = useGeolocation()
 
   let values: { [id: string]: LocationItem } = {}
 
-  if (!geolocation || !geolocation.latitude || !geolocation.longitude) {
+  if (!geolocation || !geolocation.latitude || !geolocation.longitude || IS_OVERRIDE_ENABLED) {
     // During dev, the browser stops giving the location after many refreshes; giving Denver here
     geolocation = {
-      latitude: 39.7392,
-      longitude: -104.9903,
+      latitude: 43.790428,
+      longitude: -110.681763
     }
   }
 
