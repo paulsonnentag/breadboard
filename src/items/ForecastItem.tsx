@@ -19,7 +19,6 @@ export const ForecastItemDefinition: ItemDefinition = {
 
 
 
-
     const start = dateItem.date
     const end = dateItem.duration ? dateItem.date + dateItem.duration : endOfDay(dateItem.date)
 
@@ -27,8 +26,8 @@ export const ForecastItemDefinition: ItemDefinition = {
     let max: number | undefined = undefined
 
 
-    if (!forecast) {
-      return "error"
+    if (!forecast || !forecast.hourly) {
+      return "...loading"
     }
 
 

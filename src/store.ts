@@ -61,6 +61,12 @@ export function useStore(documentId: DocumentId) {
         doc.paths.push(path)
       })
     },
+
+    deletePathAtIndex: (index: number) => {
+      updateDoc(doc => {
+        delete doc.paths[index]
+      })
+    },
     
     addView: (view: View, pathId: number) => {
       updateDoc(doc => {

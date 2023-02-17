@@ -102,7 +102,7 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
       <div className="border-b border-gray-300  flex flex-col gap-4">
         <div className="flex gap-2 px-2 py-2">
           <button
-            className={classNames("rounded-xl p-2 hover:bg-gray-200", {
+            className={classNames("rounded-xl px-2 py-1 hover:bg-gray-200", {
               "bg-gray-200": viewMode === "forecast",
             })}
             onClick={() => setViewMode("forecast")}
@@ -110,7 +110,7 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
             Forecast
           </button>
           <button
-            className={classNames("rounded-xl p-2 hover:bg-gray-200", {
+            className={classNames("rounded-xl px-2 py-1 hover:bg-gray-200", {
               "bg-gray-200": viewMode === "normals",
             })}
             onClick={() => setViewMode("normals")}

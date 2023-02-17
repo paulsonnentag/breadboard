@@ -11,9 +11,10 @@ interface PathViewProps {
   addView: (view: View) => void
   updateItems: UpdateItemsFn,
   onCreateNewPath: (path: Path) => void
+  onDeletePath: () => void
 }
 
-export function PathView({ path, addView, updateItems, onCreateNewPath }: PathViewProps) {
+export function PathView({ path, addView, updateItems, onCreateNewPath, onDeletePath }: PathViewProps) {
   const items = path.items
 
   return (
@@ -26,8 +27,9 @@ export function PathView({ path, addView, updateItems, onCreateNewPath }: PathVi
       
       {path.views.length !== 0 && 
         <>
+          <div className="flex gap-2 mb-2 p-8 pb-0 justify-between">
         <div
-          className="flex items-center gap-2 mb-2 p-8 pb-0"
+          className="flex items-center gap-2"
         >
           {items.map((item, index) => (
             <ItemToken item={item} key={index} items={items} />
@@ -37,6 +39,14 @@ export function PathView({ path, addView, updateItems, onCreateNewPath }: PathVi
             className="font-medium text-gray-400"
           >&#43;</p>
         </div>
+            <button className="cursor-pointer"
+              onClick={() => onDeletePath() /*  get rid of automerge meta data */}
+            >
+              <span className="material-symbols-rounded text-base font-normal">close</span>
+
+            </button>
+
+          </div>
         <div className="flex gap-2 overflow-auto p-8 pt-2">
           {path.views.map((view, index) => (
             <div className="w-[500px] h-[500px] flex-shrink-0" key={index}>

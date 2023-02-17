@@ -2,6 +2,7 @@ import { ItemViewProps, ViewDefinition } from "./index"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import { PoiResultSetItem } from "../items/PoiResultItemSet";
 import { Path } from "../store";
+import { useHoveredItemContext } from "../hoverState";
 
 export const PoiFinderViewDefinition: ViewDefinition = {
   name: "poiFinder",
@@ -14,7 +15,6 @@ export const PoiFinderViewDefinition: ViewDefinition = {
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.
 export const PoiFinderView = ({ items, onCreateNewPath }: ItemViewProps) => {
   let poiResultSetItem = items.find((i) => i.type === "poiResultSet")
-
   const resultSetItem: PoiResultSetItem = poiResultSetItem!.value
 
   if (!resultSetItem) {

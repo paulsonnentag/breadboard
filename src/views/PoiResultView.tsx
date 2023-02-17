@@ -3,8 +3,6 @@ import "react-big-calendar/lib/css/react-big-calendar.css"
 import { PoiResultItem } from "../items/PoiResultItem"
 import { useEffect } from "react"
 import { LocationItem } from "../items/LocationItem"
-import { getTime } from "date-fns"
-import { Item } from "../store"
 
 export const PoiResultViewDefinition: ViewDefinition = {
   name: "poiResult",
@@ -19,21 +17,14 @@ export const PoiResultView = ({ items, updateItems }: ItemViewProps) => {
   let poiResultItem = items.find((i) => i.type === "poiResult")!.value as PoiResultItem
   let locationItem = items.find((i) => i.type === "geolocation")?.value as LocationItem
 
-
-
   // this should be done by a transformer
   useEffect(() => {
-
-
     if (
       locationItem && (
         locationItem.lat !== poiResultItem.latLng.lat ||
         locationItem.long !== poiResultItem.latLng.lng
       )
     ) {
-
-
-
       const locationItem = items.find((i) => i.type === "geolocation")
       if (locationItem) {
         const newLocationItem = {

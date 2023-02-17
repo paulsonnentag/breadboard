@@ -56,46 +56,49 @@ export function useWeatherProvider(paths: Item[][]) {
           [id]: { forecast: undefined } as ForecastItem,
         }))
 
-        const closestStationId = getClosestStationId(latLong.lat, latLong.long)
 
-        Promise.all([
-          fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latLong.lat}&longitude=${latLong.long}&hourly=weathercode,temperature_2m&timeformat=unixtime`
-          ).then((res) => res.json()),
-          fetch(
-            `https://www.ncei.noaa.gov/data/normals-monthly/2006-2020/access/${closestStationId}.csv`
-          )
-            .then((res) => res.text())
-            .then(
-              (res) =>
-                new Promise((resolve) => {
-                  parse(res, {columns: true},(err, records) => resolve(records))
-                })
-            ),
-        ])
-
-          // for documentation see https://open-meteo.com/en/docs
-
-          .then(([forecast, normals]) => {
-            const forecastItem: ForecastItem = {
-              forecast,
-              normals,
-            }
-
-            fetchedForecasts[`${latLong.lat}::${latLong.long}`] = forecastItem
-
-            // Could id be out of date in some cases?
-            setValues((forecasts) => ({
-              ...forecasts,
-              [id]: forecastItem,
-            }))
-          })
+        getForecastItemAt(latLong.lat, latLong.long).then((forecastItem) => {
+          setValues((forecasts) => ({
+            ...forecasts,
+            [id]: forecastItem,
+          }))
+        })
       }
     }
   }, [JSON.stringify(toFetch)]) // this is really aweful but it works
 
   return values
 }
+
+function getForecastItemAt (lat: number, long: number) {
+  const closestStationId = getClosestStationId(lat, long)
+
+  return Promise.all([
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&hourly=weathercode,temperature_2m&timeformat=unixtime`
+    ).then((res) => res.json()),
+    fetch(
+      `https://www.ncei.noaa.gov/data/normals-monthly/2006-2020/access/${closestStationId}.csv`
+    )
+      .then((res) => res.text())
+      .then(
+        (res) =>
+          new Promise((resolve) => {
+            parse(res, {columns: true},(err, records) => resolve(records))
+          })
+      ),
+  ])
+
+    // for documentation see https://open-meteo.com/en/docs
+
+    .then(([forecast, normals]) => {
+      return {
+        forecast,
+        normals,
+      }
+    })
+}
+
 
 const stationPointsCollection = turf.featureCollection(
   stations.map((station) => {
