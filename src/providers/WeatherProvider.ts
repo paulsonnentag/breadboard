@@ -1,31 +1,29 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { DateItem } from "../items/DateItem";
-import { ForecastItem } from "../items/ForecastItem";
-import { LocationItem } from "../items/LocationItem";
-import { Item } from "../store";
+import { useCallback, useEffect, useRef, useState } from "react"
+import { DateItem } from "../items/DateItem"
+import { ForecastItem } from "../items/ForecastItem"
+import { LocationItem } from "../items/LocationItem"
+import { Item } from "../store"
 import stations from "./stations.json"
 import * as turf from "@turf/helpers"
 import nearestPoint from "@turf/nearest-point"
-import { type } from "os";
-
+import { parse } from "csv-parse/browser/esm"
 
 interface LatLong {
-  lat: number 
+  lat: number
   long: number
 }
 
-let fetchedForecasts: {[latLong: string]: ForecastItem | "loading"} = {}
+let fetchedForecasts: { [latLong: string]: ForecastItem | "loading" } = {}
 
 export function useWeatherProvider(paths: Item[][]) {
   const [values, setValues] = useState(fetchedForecasts as { [id: string]: ForecastItem })
 
-  let toFetch: {[id: string]: LatLong} = {}
+  let toFetch: { [id: string]: LatLong } = {}
 
   for (var items of paths) {
     // Only supporting one location item and one weather view per path atm; can adjust in future.
-    const locItem = items.find(i => i.type === "geolocation" && i.value)
-    const forecast = items.find(i => i.type === "forecast")
-
+    const locItem = items.find((i) => i.type === "geolocation" && i.value)
+    const forecast = items.find((i) => i.type === "forecast")
 
     if (locItem && forecast && !forecast.value) {
       toFetch[forecast.id] = locItem.value
@@ -40,44 +38,58 @@ export function useWeatherProvider(paths: Item[][]) {
         continue
       }
 
-      let fetchedForecast = fetchedForecasts[`${latLong.lat}::${latLong.long}`];
+      let fetchedForecast = fetchedForecasts[`${latLong.lat}::${latLong.long}`]
       if (fetchedForecast) {
         // It exists or is loading already
         if (fetchedForecast !== "loading") {
-          setValues(forecasts => ({
+          setValues((forecasts) => ({
             ...forecasts,
-            [id]: { forecast: fetchedForecast } as ForecastItem
+            [id]: { forecast: fetchedForecast } as ForecastItem,
           }))
         }
-      }
-      else {
+      } else {
         // Need to load
         fetchedForecasts[`${latLong.lat}::${latLong.long}`] = "loading"
 
-        setValues(forecasts => ({
+        setValues((forecasts) => ({
           ...forecasts,
-          [id] : { forecast: undefined } as ForecastItem
+          [id]: { forecast: undefined } as ForecastItem,
         }))
 
+        const closestStationId = getClosestStationId(latLong.lat, latLong.long)
 
-        // for documentation see https://open-meteo.com/en/docs
-        fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latLong.lat}&longitude=${latLong.long}&hourly=weathercode,temperature_2m&timeformat=unixtime`
-        )
-        .then((res) => res.json())
-        .then((data) => {
-          fetchedForecasts[`${latLong.lat}::${latLong.long}`] = data
+        Promise.all([
+          fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latLong.lat}&longitude=${latLong.long}&hourly=weathercode,temperature_2m&timeformat=unixtime`
+          ).then((res) => res.json()),
+          fetch(
+            `https://www.ncei.noaa.gov/data/normals-monthly/2006-2020/access/${closestStationId}.csv`
+          )
+            .then((res) => res.text())
+            .then(
+              (res) =>
+                new Promise((resolve) => {
+                  parse(res, {columns: true},(err, records) => resolve(records))
+                })
+            ),
+        ])
 
-          console.log(getClosestStation(latLong.lat, latLong.long))
+          // for documentation see https://open-meteo.com/en/docs
 
-          // Could id be out of date in some cases?
-          setValues(forecasts => ({
+          .then(([forecast, normals]) => {
+            const forecastItem: ForecastItem = {
+              forecast,
+              normals,
+            }
+
+            fetchedForecasts[`${latLong.lat}::${latLong.long}`] = forecastItem
+
+            // Could id be out of date in some cases?
+            setValues((forecasts) => ({
               ...forecasts,
-              [id] : { forecast: data } as ForecastItem
-          }))
-        })
-
-
+              [id]: forecastItem,
+            }))
+          })
       }
     }
   }, [JSON.stringify(toFetch)]) // this is really aweful but it works
@@ -85,14 +97,13 @@ export function useWeatherProvider(paths: Item[][]) {
   return values
 }
 
+const stationPointsCollection = turf.featureCollection(
+  stations.map((station) => {
+    return turf.point([station.lat, station.long], { name: station.name })
+  })
+)
 
-
-const stationPointsCollection = turf.featureCollection(stations.map((station) => {
-  return turf.point([station.lat, station.long], { name: station.name })
-}))
-
-
-function getClosestStation (lat: number, long: number) {
+function getClosestStationId(lat: number, long: number) {
   const nearestStationPoint = nearestPoint(turf.point([lat, long]), stationPointsCollection)
 
   return nearestStationPoint.properties.name

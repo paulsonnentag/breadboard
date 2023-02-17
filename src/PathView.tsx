@@ -39,7 +39,7 @@ export function PathView({ path, addView, updateItems, onCreateNewPath }: PathVi
         </div>
         <div className="flex gap-2 overflow-auto p-8 pt-2">
           {path.views.map((view, index) => (
-            <div className="w-[400px] h-[400px] flex-shrink-0" key={index}>
+            <div className="w-[500px] h-[500px] flex-shrink-0" key={index}>
               <ViewFrame view={view} items={items} updateItems={updateItems} onCreateNewPath={onCreateNewPath} />
             </div>
           ))}

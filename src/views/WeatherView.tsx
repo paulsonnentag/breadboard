@@ -7,13 +7,19 @@ import {
   getTime,
   startOfMonth,
   differenceInMilliseconds,
-  endOfMonth, format, startOfDay, subMinutes, isEqual, startOfHour,
+  endOfMonth,
+  format,
+  startOfDay,
+  subMinutes,
+  isEqual,
+  startOfHour,
 } from "date-fns"
 import { Item } from "../store"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { DateItem } from "../items/DateItem"
 import { ForecastItem } from "../items/ForecastItem"
-import moment, { Moment } from "moment/moment";
+import moment, { Moment } from "moment/moment"
+import classNames from "classnames"
 
 export const WeatherViewDefinition: ViewDefinition = {
   name: "weather",
@@ -31,10 +37,14 @@ interface Forecast {
   temperature: number
 }
 
+type ViewMode = "forecast" | "normals"
+
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.
 export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
-  let forecast = (items.find((i) => i.type == "forecast")?.value as ForecastItem)?.forecast
+  let forecastItem = (items.find((i) => i.type == "forecast")?.value as ForecastItem)
+  const { forecast, normals } = forecastItem ?? {}
   let dateItem = items.find((i) => i.type === "date")
+  const [viewMode, setViewMode] = useState<ViewMode>("normals")
 
   const dateOptions = useMemo(() => {
     const today = getTime(startOfToday())
@@ -44,14 +54,14 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
       options.push({ date: getTime(addDays(today, i)), duration: MILLISECONDS_IN_DAY })
     }
 
-    for (let i = 1; i <= 6; i++) {
+    /*for (let i = 1; i <= 6; i++) {
       const date = addMonths(startOfMonth(today), i)
 
       options.push({
         date: getTime(date),
         duration: differenceInMilliseconds(endOfMonth(date), date),
       })
-    }
+    }*/
 
     return options
   }, [])
@@ -63,82 +73,144 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
 
   const onChangeDateOption = (index: number) => {
     if (dateItem) {
-      updateItems([{...dateItem, value: dateOptions[index]}])
+      updateItems([{ ...dateItem, value: dateOptions[index] }])
     }
   }
-
 
   const currentHour = startOfHour(Date.now())
 
   const predictions: Forecast[] = forecast
     ? forecast.hourly.time
-      .map((time: number, index: number) => {
-        return {
-          timestamp: time * 1000,
-          description: getWeatherDescription(forecast.hourly.weathercode[index]),
-          temperature: forecast.hourly.temperature_2m[index],
-        }
-      })
-      .filter(({ timestamp }: Forecast) =>
-        isEqual(startOfDay(subMinutes(timestamp, 1)), startOfDay(dateItem!.value.date))
-      )
+        .map((time: number, index: number) => {
+          return {
+            timestamp: time * 1000,
+            description: getWeatherDescription(forecast.hourly.weathercode[index]),
+            temperature: forecast.hourly.temperature_2m[index],
+          }
+        })
+        .filter(({ timestamp }: Forecast) =>
+          isEqual(startOfDay(subMinutes(timestamp, 1)), startOfDay(dateItem!.value.date))
+        )
     : []
 
-  const currentPrediction = predictions.find(({ timestamp }) => isEqual(startOfHour(timestamp), currentHour))
-
+  const currentPrediction = predictions.find(({ timestamp }) =>
+    isEqual(startOfHour(timestamp), currentHour)
+  )
 
   return (
-    <div className="flex flex-col h-full" style={{minHeight: 0}}>
-      {!forecast && <h1 className="text-gray-400">Loading...</h1>}
+    <div className="flex flex-col h-full" style={{ minHeight: 0 }}>
+      <div className="border-b border-gray-300  flex flex-col gap-4">
+        <div className="flex gap-2 px-2 py-2">
+          <button
+            className={classNames("rounded-xl p-2 hover:bg-gray-200", {
+              "bg-gray-200": viewMode === "forecast",
+            })}
+            onClick={() => setViewMode("forecast")}
+          >
+            Forecast
+          </button>
+          <button
+            className={classNames("rounded-xl p-2 hover:bg-gray-200", {
+              "bg-gray-200": viewMode === "normals",
+            })}
+            onClick={() => setViewMode("normals")}
+          >
+            Averages
+          </button>
+        </div>
+      </div>
 
-      {currentPrediction && (
-        <div className="flex justify-between px-4 py-2 border-b border-gray-300">
-          <div className="font-bold">now</div>
-          <div>
-            {currentPrediction.temperature} ° {currentPrediction.description}
+      {!forecast && <h1 className="text-gray-400 p-4">Loading...</h1>}
+
+
+      {viewMode === "normals" && normals && (
+        <div className="flex-1 p-4 overflow-auto" style={{minHeight: 0}}>
+          <table className="w-full">
+
+            <thead>
+              <tr>
+                <th className="text-left">Month</th><th className="text-right">Max / Min</th>
+              </tr>
+            </thead>
+            <tbody>
+          {normals.map((month : any) => {
+            // there is some weirdness in the normals data set where everything is in Fahrenheit for some weird reason
+            const min = fahrenheitToCelsius(parseFloat(month["MLY-TMIN-NORMAL"]))
+            const max = fahrenheitToCelsius(parseFloat(month["MLY-TMAX-NORMAL"]))
+
+
+            return (<tr key={month.DATE}>
+              <td>{getMonthName(month.DATE)}</td>
+              <td className={classNames("text-right", {
+                "text-blue-500": min < 0 || max < 0
+              })}>{min.toFixed(1)}° / {max.toFixed(1)}°</td>
+            </tr>)
+          })}
+            </tbody>
+          </table>
+        </div>
+
+      )}
+
+      {viewMode === "forecast" && (
+        <>
+          {currentPrediction && (
+            <div className="flex justify-between px-4 py-2 border-b border-gray-300">
+              <div className="font-bold">now</div>
+              <div className="flex gap-2">
+                <span>{currentPrediction.description}</span>
+                 <span className={classNames({
+                   "text-blue-500 w-[60px] text-right": currentPrediction.temperature < 0
+                 })}>{currentPrediction.temperature.toFixed(1)} °</span>
+              </div>
+            </div>
+          )}
+
+          <div
+            className="flex flex-col flex-1 overflow-auto px-4 gap-1 pt-2"
+            style={{ minHeight: 0 }}
+          >
+            {predictions.map((prediction, index) => (
+              <div className="flex justify-between" key={index}>
+                <div className="">{format(prediction.timestamp, "h a")}</div>
+                <div className="flex gap-2">
+                  <span>{prediction.description}</span>
+                  <span className={classNames({
+                    "text-blue-500 w-[60px] text-right": prediction.temperature < 0
+                  })}>{prediction.temperature.toFixed(1)} °</span>
+                </div>
+              </div>
+            ))}
+
+            {predictions.length == 0 && (
+              <div className="flex items-center justify-center w-full h-full text-gray-500">
+                no data available
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      {viewMode === "forecast" && (
+        <div className="px-4 py-2 border-t border-gray-300">
+          <input
+            className="w-full"
+            type="range"
+            min={0}
+            max={dateOptions.length - 1}
+            step={1}
+            value={selectedDateOptionIndex}
+            onChange={(evt) => onChangeDateOption(parseInt(evt.target.value, 10))}
+          />
+          <div className="flex justify-between text-gray-400">
+            <button onClick={() => onChangeDateOption(0)} className="cursor-pointer">
+              Today
+            </button>
+            <button onClick={() => onChangeDateOption(6)} className="cursor-pointer ml-4">
+              1 week
+            </button>
           </div>
         </div>
       )}
-
-      <div className="flex flex-col flex-1 overflow-auto px-4 gap-2 pt-2" style={{minHeight: 0}}>
-        {predictions.map((prediction, index) => (
-          <div className="flex justify-between" key={index}>
-            <div className="">{format(prediction.timestamp, "h a")}</div>
-            <div>
-              {prediction.temperature} ° {prediction.description}
-            </div>
-          </div>
-        ))}
-
-        {predictions.length == 0 && (
-          <div className="flex items-center justify-center w-full h-full text-gray-500">
-            no data available
-          </div>
-        )}
-      </div>
-
-      <div className="px-4 py-2 border-t border-gray-300">
-        <input
-          className="w-full"
-          type="range"
-          min={0}
-          max={dateOptions.length - 1}
-          step={1}
-          value={selectedDateOptionIndex}
-          onChange={(evt) => onChangeDateOption(parseInt(evt.target.value, 10))}
-        />
-        <div className="flex justify-between text-gray-400">
-          <button onClick={() => onChangeDateOption(0)} className="cursor-pointer">
-            Today
-          </button>
-          <button onClick={() => onChangeDateOption(6)} className="cursor-pointer ml-4">
-            1 week
-          </button>
-          <button onClick={() => onChangeDateOption(12)} className="cursor-pointer">
-            6 months
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -157,8 +229,6 @@ function getSelectedOptionIndex(date: Date, options: DateItem[]) {
 
   return options.length - 1
 }
-
-
 
 function getWeatherDescription(code: number): string {
   switch (code) {
@@ -221,4 +291,22 @@ function getWeatherDescription(code: number): string {
     default:
       return ""
   }
+}
+
+
+function getMonthName(monthNum: string) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Subtract 1 from monthNum since the array is zero-indexed
+  const index = parseInt(monthNum) - 1;
+
+  if (index >= 0 && index < months.length) {
+    return months[index];
+  } else {
+    return null;
+  }
+}
+
+function fahrenheitToCelsius(fahrenheit: number) {
+  return (fahrenheit - 32) * (5/9);
 }

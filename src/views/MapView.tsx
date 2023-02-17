@@ -11,6 +11,7 @@ import MapsEventListener = google.maps.MapsEventListener;
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView;
 import { PoiResultItemSet } from "../items/PoiResultItemSet";
 
+
 export const MapViewDefinition: ViewDefinition = {
   name: "map",
   inputs: ["geolocation"], // not declaring the poiResultSet here, because we only want to passively observe it if its there
