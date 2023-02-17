@@ -41,7 +41,7 @@ type ViewMode = "forecast" | "normals"
 
 // The proper model would only cause views to receive items they've listed as inputs; for now we are simply passing all the path's data items.
 export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
-  let forecastItem = (items.find((i) => i.type == "forecast")?.value as ForecastItem)
+  let forecastItem = items.find((i) => i.type == "forecast")?.value as ForecastItem
   const { forecast, normals } = forecastItem ?? {}
   let dateItem = items.find((i) => i.type === "date")
   const [viewMode, setViewMode] = useState<ViewMode>("normals")
@@ -122,34 +122,49 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
 
       {!forecast && <h1 className="text-gray-400 p-4">Loading...</h1>}
 
-
       {viewMode === "normals" && normals && (
-        <div className="flex-1 p-4 overflow-auto" style={{minHeight: 0}}>
+        <div className="flex-1 p-4 overflow-auto" style={{ minHeight: 0 }}>
           <table className="w-full">
-
             <thead>
               <tr>
-                <th className="text-left">Month</th><th className="text-right">Max / Min</th>
+                <th className="text-left">Month</th>
+                <th className="text-right">Min</th>
+                <th className="text-right">Max</th>
               </tr>
             </thead>
             <tbody>
-          {normals.map((month : any) => {
-            // there is some weirdness in the normals data set where everything is in Fahrenheit for some weird reason
-            const min = fahrenheitToCelsius(parseFloat(month["MLY-TMIN-NORMAL"]))
-            const max = fahrenheitToCelsius(parseFloat(month["MLY-TMAX-NORMAL"]))
+              {normals.map((month: any) => {
+                // there is some weirdness in the normals data set where everything is in Fahrenheit for some weird reason
+                const min = fahrenheitToCelsius(parseFloat(month["MLY-TMIN-NORMAL"]))
+                const max = fahrenheitToCelsius(parseFloat(month["MLY-TMAX-NORMAL"]))
 
-
-            return (<tr key={month.DATE}>
-              <td>{getMonthName(month.DATE)}</td>
-              <td className={classNames("text-right", {
-                "text-blue-500": min < 0 || max < 0
-              })}>{min.toFixed(1)}° / {max.toFixed(1)}°</td>
-            </tr>)
-          })}
+                return (
+                  <tr key={month.DATE}>
+                    <td>{getMonthName(month.DATE)}</td>
+                    <td className="text-right">
+                      <span
+                        className={classNames({
+                          "text-blue-500": min < 0,
+                        })}
+                      >
+                        {min.toFixed(1)}°
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      <span
+                        className={classNames({
+                          "text-blue-500": max < 0,
+                        })}
+                      >
+                        {max.toFixed(1)}°
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
-
       )}
 
       {viewMode === "forecast" && (
@@ -159,9 +174,13 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
               <div className="font-bold">now</div>
               <div className="flex gap-2">
                 <span>{currentPrediction.description}</span>
-                 <span className={classNames({
-                   "text-blue-500 w-[60px] text-right": currentPrediction.temperature < 0
-                 })}>{currentPrediction.temperature.toFixed(1)} °</span>
+                <span
+                  className={classNames({
+                    "text-blue-500 w-[60px] text-right": currentPrediction.temperature < 0,
+                  })}
+                >
+                  {currentPrediction.temperature.toFixed(1)} °
+                </span>
               </div>
             </div>
           )}
@@ -175,9 +194,13 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
                 <div className="">{format(prediction.timestamp, "h a")}</div>
                 <div className="flex gap-2">
                   <span>{prediction.description}</span>
-                  <span className={classNames({
-                    "text-blue-500 w-[60px] text-right": prediction.temperature < 0
-                  })}>{prediction.temperature.toFixed(1)} °</span>
+                  <span
+                    className={classNames({
+                      "text-blue-500 w-[60px] text-right": prediction.temperature < 0,
+                    })}
+                  >
+                    {prediction.temperature.toFixed(1)} °
+                  </span>
                 </div>
               </div>
             ))}
@@ -293,20 +316,32 @@ function getWeatherDescription(code: number): string {
   }
 }
 
-
 function getMonthName(monthNum: string) {
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ]
 
   // Subtract 1 from monthNum since the array is zero-indexed
-  const index = parseInt(monthNum) - 1;
+  const index = parseInt(monthNum) - 1
 
   if (index >= 0 && index < months.length) {
-    return months[index];
+    return months[index]
   } else {
-    return null;
+    return null
   }
 }
 
 function fahrenheitToCelsius(fahrenheit: number) {
-  return (fahrenheit - 32) * (5/9);
+  return (fahrenheit - 32) * (5 / 9)
 }
