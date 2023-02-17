@@ -3,6 +3,11 @@ import { DateItem } from "../items/DateItem";
 import { ForecastItem } from "../items/ForecastItem";
 import { LocationItem } from "../items/LocationItem";
 import { Item } from "../store";
+import stations from "./stations.json"
+import * as turf from "@turf/helpers"
+import nearestPoint from "@turf/nearest-point"
+import { type } from "os";
+
 
 interface LatLong {
   lat: number 
@@ -63,7 +68,7 @@ export function useWeatherProvider(paths: Item[][]) {
         .then((data) => {
           fetchedForecasts[`${latLong.lat}::${latLong.long}`] = data
 
-          console.log('fetch weather data')
+          console.log(getClosestStation(latLong.lat, latLong.long))
 
           // Could id be out of date in some cases?
           setValues(forecasts => ({
@@ -78,4 +83,17 @@ export function useWeatherProvider(paths: Item[][]) {
   }, [JSON.stringify(toFetch)]) // this is really aweful but it works
 
   return values
+}
+
+
+
+const stationPointsCollection = turf.featureCollection(stations.map((station) => {
+  return turf.point([station.lat, station.long], { name: station.name })
+}))
+
+
+function getClosestStation (lat: number, long: number) {
+  const nearestStationPoint = nearestPoint(turf.point([lat, long]), stationPointsCollection)
+
+  return nearestStationPoint.properties.name
 }

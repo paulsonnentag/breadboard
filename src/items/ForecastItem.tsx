@@ -4,6 +4,7 @@ import { endOfDay, startOfDay, startOfHour } from "date-fns";
 
 export interface ForecastItem {
   forecast: any
+  station: string
 }
 
 export const ForecastItemDefinition: ItemDefinition = {
