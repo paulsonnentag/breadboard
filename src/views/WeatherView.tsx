@@ -44,7 +44,7 @@ export const WeatherView = ({ items, updateItems }: ItemViewProps) => {
   let forecastItem = items.find((i) => i.type == "forecast")?.value as ForecastItem
   const { forecast, normals } = forecastItem ?? {}
   let dateItem = items.find((i) => i.type === "date")
-  const [viewMode, setViewMode] = useState<ViewMode>("normals")
+  const [viewMode, setViewMode] = useState<ViewMode>("forecast")
 
   const dateOptions = useMemo(() => {
     const today = getTime(startOfToday())

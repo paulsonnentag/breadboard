@@ -6,11 +6,8 @@ import PlaceResult = google.maps.places.PlaceResult;
 import { uuid } from "@automerge/automerge";
 import LatLng = google.maps.LatLng;
 import { PoiResultItem } from "../items/PoiResultItem";
-
-interface LatLong {
-  lat: number 
-  long: number
-}
+import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral;
+import { LocationItem } from "../items/LocationItem";
 
 let fetchedPlaces: {[latLong: string]: PoiResultSetItem | "loading"} = {}
 
@@ -19,7 +16,7 @@ export function usePoiResultSetProvider(paths: Item[][]) {
 
 
   useEffect(() => {
-    let toFetch: {[id: string]: LatLong} = {}
+    let toFetch: {[id: string]: LocationItem} = {}
 
     for (var items of paths) {
       // Only supporting one location item and one weather view per path atm; can adjust in future.
@@ -58,7 +55,7 @@ export function usePoiResultSetProvider(paths: Item[][]) {
           [id]: { results: undefined }
         }))
 
-        getPoiResultsAt(latLong.lat, latLong.long).then((resultSet) => {
+        getPoiResultsAt(latLong.lat, latLong.long, latLong.bounds).then((resultSet) => {
           setValues(forecasts => ({
             ...forecasts,
             [id]: resultSet
@@ -75,7 +72,10 @@ const placesService =  new google.maps.places.PlacesService(document.createEleme
 
 const DISABLE_FETCH = false;
 
-async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetItem> {
+async function getPoiResultsAt (lat: number, lng: number, bounds?: LatLngBoundsLiteral): Promise<PoiResultSetItem> {
+
+
+  console.log("bounds", bounds)
 
   if (DISABLE_FETCH) {
     return Promise.resolve({
@@ -92,7 +92,7 @@ async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetI
           id: uuid(),
           name: "Wohnmobil-Stellplatz Bad Aachen",
           rating : 2.4,
-          latLng: { lat: lat + 0.0001, lng },
+          latLng: { lat: lat + 0.02, lng },
           photos: [],
           address: "Branderhofer Weg 11, 52066 Aachen, Germany",
           website : "http://www.aachen-camping.de/"
@@ -100,11 +100,16 @@ async function getPoiResultsAt (lat: number, lng: number): Promise<PoiResultSetI
     })
   }
 
+
   return new Promise((resolve) => {
   placesService.nearbySearch(
-    {
+    bounds ?
+      {
+        bounds,
+        type: "campground",
+      } : {
       location: new LatLng(lat, lng),
-      radius: 50000,
+      radius: 20000,
       type: "campground",
     },
     async (results) => {

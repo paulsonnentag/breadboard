@@ -1,6 +1,6 @@
 import { ItemViewProps, ViewDefinition } from "."
 import { Item } from "../store"
-import { useEffect, useId, useMemo, useRef } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 import { debounce } from "lodash"
 import Map = google.maps.Map
 import LatLng = google.maps.LatLng
@@ -10,6 +10,8 @@ import { LocationItem } from "../items/LocationItem"
 import MapsEventListener = google.maps.MapsEventListener;
 import AdvancedMarkerView = google.maps.marker.AdvancedMarkerView;
 import { PoiResultItemSet } from "../items/PoiResultItemSet";
+import { useHoveredItemContext } from "../hoverState";
+import classNames from "classnames";
 
 
 export const MapViewDefinition: ViewDefinition = {
@@ -42,6 +44,7 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
   const mapRef = useRef<Map>()
   const containerRef = useRef<HTMLDivElement>(null)
   const geoCoder = useMemo(() => new google.maps.Geocoder(), [])
+  const [hoveredItemId, setHoveredItemId] = useHoveredItemContext()
 
   useEffect(() => {
     const currentContainer = containerRef.current
@@ -91,13 +94,12 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
           let biggestContainedResult = getBiggestContainedResult(mapBounds, results)
 
           if (locationItem) {
-            const newItemValue: LocationItem = {
+            locationItem.value =  {
               lat: center.lat(),
               long: center.lng(),
+              bounds: currentMap.getBounds()?.toJSON(),
               title: biggestContainedResult.formatted_address
-            }
-
-            locationItem.value = newItemValue
+            } as LocationItem
 
             updateItems([locationItem])
           }
@@ -169,7 +171,9 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
 
       const markerContent = mapsMarker.content as HTMLDivElement
 
-      markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer bg-red-500`
+      markerContent.className = classNames(`w-[16px] h-[16px] rounded-full cursor-pointer border`,
+          hoveredItemId === poiResult.id ? "bg-lime-500 border-lime-700" : "bg-red-500 border-red-700"
+      )
 
       /*
       markerContent.className = `w-[16px] h-[16px] rounded-full shadow cursor-pointer ${
@@ -183,13 +187,25 @@ export const MapView = ({ items, updateItems }: ItemViewProps) => {
       }
        */
 
+      /*
+
+      listenersRef.current.push(mapsMarker.addListener("mouseenter", () => {
+        console.log("enter")
+
+        setHoveredItemId(poiResult.id)
+      }))
+
+      listenersRef.current.push(mapsMarker.addListener("mouseleave", () => {
+        setHoveredItemId(undefined)
+      }))*/
+
       console.log("update", poiResult.latLng)
 
       mapsMarker.position = new LatLng(poiResult.latLng)
 
-      // mapsMarker.zIndex = geoMarker.entity.data.isHovered ? 10 : 0
+      mapsMarker.zIndex =  hoveredItemId === poiResult.id ? 10 : 0
     }
-  }, [poiResultSet, mapRef.current])
+  }, [poiResultSet, mapRef.current, hoveredItemId])
 
   return (
     <div

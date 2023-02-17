@@ -5,6 +5,8 @@ import { CalendarViewDefinition } from "./views/CalendarView"
 import { MapViewDefinition } from "./views/MapView"
 import { WeatherViewDefinition } from "./views/WeatherView"
 import { PoiFinderViewDefinition } from "./views/PoiFinderView";
+import { useState } from "react";
+import { HoveredItemContext} from "./hoverState";
 
 interface PathViewProps {
   path: Path
@@ -17,7 +19,11 @@ interface PathViewProps {
 export function PathView({ path, addView, updateItems, onCreateNewPath, onDeletePath }: PathViewProps) {
   const items = path.items
 
+  const hoveredItemIdState = useState<string|undefined>(undefined)
+
+
   return (
+    <HoveredItemContext.Provider value={hoveredItemIdState}>
     <div
       className="w-full"
     >
@@ -61,6 +67,7 @@ export function PathView({ path, addView, updateItems, onCreateNewPath, onDelete
         </> 
       }
     </div>
+    </HoveredItemContext.Provider>
   )
 }
 

@@ -1,8 +1,10 @@
 import { ItemDefinition } from "."
+import LatLngBoundsLiteral = google.maps.LatLngBoundsLiteral
 
 export interface LocationItem {
   lat: number
   long: number
+  bounds?: LatLngBoundsLiteral
   title: string
 }
 
